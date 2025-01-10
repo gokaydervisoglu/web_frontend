@@ -87,7 +87,7 @@ const App = () => {
         <nav className="navbar">
           <div className="navbar-container">
             <Link to="/" className="navbar-brand">
-              <span className="brand-text">E-Commerce</span>
+              <span className="brand-text">E-Gokay</span>
             </Link>
 
             <div className="navbar-content">
