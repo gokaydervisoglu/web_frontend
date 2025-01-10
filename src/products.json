@@ -1,0 +1,140 @@
+{
+    "products": [
+      {
+        "product_name": "Kırkağaç Kavun",
+        "product_desc": "2 - 2,5 kg",
+        "price": 95,
+        "stock_quantity": 20,
+        "categories": {
+          "category_name": "Meyve ve Sebze"
+        }
+      },
+      {
+        "product_name": "Mandalina",
+        "product_desc": "1 kg",
+        "price": 84,
+        "stock_quantity": 15,
+        "categories": {
+          "category_name": "Meyve ve Sebze"
+        }
+      },
+      {
+        "product_name": "Portakal",
+        "product_desc": "1 kg",
+        "price": 42.99,
+        "stock_quantity": 25,
+        "categories": {
+          "category_name": "Meyve ve Sebze"
+        }
+      },
+      {
+        "product_name": "Patlıcan",
+        "product_desc": "1 kg",
+        "price": 104.99,
+        "stock_quantity": 30,
+        "categories": {
+          "category_name": "Meyve ve Sebze"
+        }
+      },
+      {
+        "product_name": "Cherry Domates",
+        "product_desc": "500 g",
+        "price": 25.99,
+        "stock_quantity": 40,
+        "categories": {
+          "category_name": "Meyve ve Sebze"
+        }
+      },
+      {
+        "product_name": "Salatalık",
+        "product_desc": "1 kg",
+        "price": 64.99,
+        "stock_quantity": 50,
+        "categories": {
+          "category_name": "Meyve ve Sebze"
+        }
+      },
+      {
+        "product_name": "Magnum Euphoria & Chill Paketi",
+        "product_desc": "4 Ürün",
+        "price": 231,
+        "stock_quantity": 10,
+        "categories": {
+          "category_name": "Dondurma"
+        }
+      },
+      {
+        "product_name": "Algida Classics Paketi",
+        "product_desc": "4 Ürün",
+        "price": 69.99,
+        "stock_quantity": 15,
+        "categories": {
+          "category_name": "Dondurma"
+        }
+      },
+      {
+        "product_name": "Pela Mini 6'lı Tanışma Paketi",
+        "product_desc": "6 Ürün",
+        "price": 149.95,
+        "stock_quantity": 20,
+        "categories": {
+          "category_name": "Dondurma"
+        }
+      },
+      {
+        "product_name": "Pela Mini Antep Fıstık & Karadut",
+        "product_desc": "4 Ürün",
+        "price": 99.99,
+        "stock_quantity": 25,
+        "categories": {
+          "category_name": "Dondurma"
+        }
+      },
+      {
+        "product_name": "Algida Milka Stick",
+        "product_desc": "82 ml",
+        "price": 40,
+        "stock_quantity": 30,
+        "categories": {
+          "category_name": "Dondurma"
+        }
+      },
+      {
+        "product_name": "Magnum Double Chill",
+        "product_desc": "85 ml",
+        "price": 65,
+        "stock_quantity": 50,
+        "categories": {
+          "category_name": "Dondurma"
+        }
+      },
+      {
+        "product_name": "Magnum Classic",
+        "product_desc": "100 ml",
+        "price": 65,
+        "stock_quantity": 60,
+        "categories": {
+          "category_name": "Dondurma"
+        }
+      },
+      {
+        "product_name": "Magnum Cookie",
+        "product_desc": "95 ml",
+        "price": 65,
+        "stock_quantity": 55,
+        "categories": {
+          "category_name": "Dondurma"
+        }
+      },
+      {
+        "product_name": "Oba Yüksük Makarna",
+        "product_desc": "500 g",
+        "price": 22,
+        "stock_quantity": 30,
+        "categories": {
+          "category_name": "Temel Gıda"
+        }
+      }
+    ]
+  }
+  
