@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:1337', // Strapi'nin temel URL'si
+  baseURL: process.env.REACT_APP_API_URL, // Using environment variable for API URL
 });
 
 export default API;
