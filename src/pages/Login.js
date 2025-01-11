@@ -24,20 +24,20 @@ const Login = ({ onLogin }) => {
         identifier: email,
         password,
       });
-
-      console.log('Login successful:', response.data);
-      // Giriş başarılı ise token'i App.js'deki handleLogin'e gönder
       onLogin(response.data.jwt);
-      alert('Giriş Başarılı!');
-
-      // Giriş başarılı olduktan sonra Home ("/") sayfasına yönlendir
-      navigate('/');
+      setToast({ 
+        show: true, 
+        message: 'Giriş başarılı! Yönlendiriliyorsunuz...', 
+        type: 'success' 
+      });
+      setTimeout(() => navigate('/'), 1500);
     } catch (error) {
-      console.error(
-        'Login error:',
-        error.response ? error.response.data : error.message
-      );
-      alert('Giriş Başarısız!');
+      console.error('Login error:', error);
+      setToast({ 
+        show: true, 
+        message: 'Giriş başarısız! Bilgilerinizi kontrol edin.', 
+        type: 'error' 
+      });
     }
   };
 

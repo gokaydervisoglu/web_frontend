@@ -1,7 +1,7 @@
 // HomePublic.js
 import React, { useState, useEffect } from 'react';
 import API from '../api';
-import '../styles/Home.css';
+import '../styles/HomePublic.css';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -17,7 +17,7 @@ const HomePublic = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [quantities, setQuantities] = useState({});
+
   const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
   const navigate = useNavigate();
 
@@ -65,10 +65,10 @@ const HomePublic = () => {
   };
 
   return (
-    <div className="home-container">
-      <div className="categories-section">
-        <div className="categories-header">
-          <FontAwesomeIcon icon={faFilter} className="filter-icon" />
+    <div className="public-container">
+      <div className="public-categories-section">
+        <div className="public-categories-header">
+          <FontAwesomeIcon icon={faFilter} className="categories-icon" />
           <h2>Kategoriler</h2>
         </div>
         <div className="categories-list">
@@ -125,13 +125,7 @@ const HomePublic = () => {
         )}
       </div>
 
-      {toast.show && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast({ show: false, message: '', type: 'info' })}
-        />
-      )}
+      {toast.show && <Toast {...toast} onClose={() => setToast({ show: false, message: '', type: 'info' })} />}
     </div>
   );
 };

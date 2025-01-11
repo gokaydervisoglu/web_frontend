@@ -64,7 +64,7 @@ const CampaignDetail = () => {
       <div className="campaign-detail-content">
         {/* Resim */}
         {imageUrl && (
-          <img src={imageUrl} alt="Kampanya Resmi" className="campaign-image" />
+          <img src={imageUrl} alt="Kampanya Resmi" className="campaign-detail-image" />
         )}
 
         {/* Açıklama */}

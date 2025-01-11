@@ -240,18 +240,66 @@ nav ul li button:hover {
   }
 }
 
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Alert stilleri */
+.alert-overlay {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  animation: slideIn 0.3s ease-out;
 }
 
-.fade-in {
-  animation: fadeIn 0.3s ease-in-out;
+.alert {
+  background: white;
+  border-radius: 8px;
+  padding: 15px 25px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 300px;
+}
+
+.alert.success {
+  border-left: 4px solid #2ecc71;
+}
+
+.alert.warning {
+  border-left: 4px solid #f1c40f;
+}
+
+.alert-icon {
+  font-size: 20px;
+}
+
+.alert.success .alert-icon {
+  color: #2ecc71;
+}
+
+.alert.warning .alert-icon {
+  color: #f1c40f;
+}
+
+.alert-content {
+  flex: 1;
+}
+
+.alert-message {
+  margin: 0;
+  color: #333;
+  font-size: 14px;
+}
+
+.alert-close {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 16px;
+  transition: color 0.5s;
+}
+
+.alert-close:hover {
+  color: #333;
 }

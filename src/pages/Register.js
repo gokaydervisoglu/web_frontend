@@ -1,7 +1,7 @@
 // Register.js
 import React, { useState } from 'react';
 import API from '../api';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../styles/Auth.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -17,23 +17,29 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const response = await API.post('api/auth/local/register', {
+      await API.post('api/auth/local/register', {
         username,
         email,
         password,
       });
-      console.log('User registered:', response.data);
-      alert('Kayıt Başarılı!');
+      setToast({ 
+        show: true, 
+        message: 'Kayıt başarılı! Giriş yapabilirsiniz.', 
+        type: 'success' 
+      });
+      setTimeout(() => navigate('/login'), 1500);
     } catch (error) {
-      console.error(
-        'Registration error:',
-        error.response ? error.response.data : error.message
-      );
-      alert('Kayıt Başarısız!');
+      console.error('Registration error:', error);
+      setToast({ 
+        show: true, 
+        message: 'Kayıt başarısız! Lütfen bilgilerinizi kontrol edin.', 
+        type: 'error' 
+      });
     }
   };
 

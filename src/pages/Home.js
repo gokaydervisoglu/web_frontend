@@ -205,7 +205,7 @@ const Home = ({ userId, addToCart }) => {
       )}
 
       {/* Kampanyalar */}
-      <div className="campaigns-container">
+  
         <h2 className="section-title">Kampanyalar</h2>
         <div className="campaigns-row">
           {campaigns.length > 0 ? (
@@ -236,7 +236,6 @@ const Home = ({ userId, addToCart }) => {
             <p className="no-data">Kampanya bulunmamaktadır.</p>
           )}
         </div>
-      </div>
 
       {/* Kategoriler bölümü güncellemesi */}
       <div className="categories-section">
@@ -263,7 +262,7 @@ const Home = ({ userId, addToCart }) => {
       </div>
 
       {/* Ürünler bölümü güncellemesi */}
-      <div className="products-section">
+     
         <div className="container">
           <h2 className="section-title">Ürünler</h2>
           <div className="products-grid">
@@ -323,7 +322,6 @@ const Home = ({ userId, addToCart }) => {
             )}
           </div>
         </div>
-      </div>
     </div>
   );
 };

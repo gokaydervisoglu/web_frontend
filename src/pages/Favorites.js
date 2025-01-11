@@ -73,9 +73,9 @@ const Favorites = ({ userId }) => {
 
   if (loading) {
     return (
-      <div className="favorites-container">
-        <div className="loading-spinner">
-          <div className="spinner"></div>
+      <div className="fav-detail-container">
+        <div className="fav-detail-loading">
+          <div className="fav-detail-spinner"></div>
           <p>Favoriler yükleniyor...</p>
         </div>
       </div>
@@ -83,7 +83,7 @@ const Favorites = ({ userId }) => {
   }
 
   return (
-    <div className="favorites-container">
+    <div className="fav-detail-container">
       {alert && (
         <div className="alert-overlay">
           <div className={`alert ${alert.type}`}>
@@ -104,24 +104,24 @@ const Favorites = ({ userId }) => {
         </div>
       )}
 
-      <div className="favorites-header">
-        <h1>
-          <FontAwesomeIcon icon={faHeart} className="header-icon" />
+      <div className="fav-detail-header">
+        <h1 className="fav-detail-title">
+          <FontAwesomeIcon icon={faHeart} className="fav-detail-icon" />
           Favorilerim
         </h1>
       </div>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && <div className="fav-detail-error">{error}</div>}
 
-      <div className="favorites-grid">
+      <div className="fav-detail-grid">
         {favorites.length > 0 ? (
           favorites.map((favorite) => (
-            <div className="favorite-card" key={favorite.id}>
-              <div className="favorite-content" onClick={() => handleNavigateToProduct(favorite.product?.id)}>
-                <div className="favorite-header">
-                  <h2>{favorite.product?.product_name || 'Ürün bilgisi eksik'}</h2>
+            <div className="fav-detail-card" key={favorite.id}>
+              <div className="fav-detail-content" onClick={() => handleNavigateToProduct(favorite.product?.id)}>
+                <div className="fav-detail-info">
+                  <h2 className="fav-detail-name">{favorite.product?.product_name || 'Ürün bilgisi eksik'}</h2>
                   <button
-                    className="remove-favorite-btn"
+                    className="fav-detail-remove"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleRemoveFavorite(favorite.documentId);
@@ -131,27 +131,27 @@ const Favorites = ({ userId }) => {
                   </button>
                 </div>
 
-                <div className="favorite-details">
-                  <div className="detail-item">
-                    <FontAwesomeIcon icon={faMoneyBill} className="detail-icon" />
-                    <span className="price">
+                <div className="fav-detail-stats">
+                  <div className="fav-detail-stat-item">
+                    <FontAwesomeIcon icon={faMoneyBill} className="fav-detail-stat-icon" />
+                    <span className="fav-detail-price">
                       {favorite.product?.price ? `₺${favorite.product.price}` : 'Bilgi yok'}
                     </span>
                   </div>
 
-                  <div className="detail-item">
-                    <FontAwesomeIcon icon={faWarehouse} className="detail-icon" />
+                  <div className="fav-detail-stat-item">
+                    <FontAwesomeIcon icon={faWarehouse} className="fav-detail-stat-icon" />
                     <span>
                       Stok: {favorite.product?.stock_quantity ?? 'Bilgi yok'}
                     </span>
                   </div>
                 </div>
 
-                <div className="favorite-actions">
-                  <button className="action-btn view-btn">
+                <div className="fav-detail-actions">
+                  <button className="fav-detail-btn fav-detail-btn-view">
                     <FontAwesomeIcon icon={faBoxOpen} /> Ürün Detayı
                   </button>
-                  <button className="action-btn cart-btn">
+                  <button className="fav-detail-btn fav-detail-btn-cart">
                     <FontAwesomeIcon icon={faShoppingCart} /> Sepete Ekle
                   </button>
                 </div>
@@ -159,10 +159,10 @@ const Favorites = ({ userId }) => {
             </div>
           ))
         ) : (
-          <div className="no-favorites">
-            <FontAwesomeIcon icon={faHeart} className="no-favorites-icon" />
-            <p>Henüz favori ürününüz bulunmuyor.</p>
-            <button className="browse-btn" onClick={() => navigate('/')}>
+          <div className="fav-detail-empty">
+            <FontAwesomeIcon icon={faHeart} className="fav-detail-empty-icon" />
+            <p className="fav-detail-empty-text">Henüz favori ürününüz bulunmuyor.</p>
+            <button className="fav-detail-browse" onClick={() => navigate('/')}>
               Ürünleri Keşfet
             </button>
           </div>
