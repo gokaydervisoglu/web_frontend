@@ -1,7 +1,7 @@
 // Cart.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Cart.css';
+import '../styles/Cart.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faShoppingCart,

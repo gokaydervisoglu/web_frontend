@@ -54,19 +54,24 @@
 
 .cart-item {
   position: relative;
+  padding-right: 8px;
 }
 
 .cart-badge {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background: #ff4757;
+  top: -10px;
+  right: -12px;
+  background-color: red;
   color: white;
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
   border-radius: 50%;
-  min-width: 18px;
-  text-align: center;
+  padding: 4px 8px;
+  font-size: 13px;
+  min-width: 20px;
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .nav-dropdown {
@@ -162,21 +167,88 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+/* Hamburger menü ikonu */
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #333;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
 /* Responsive Tasarım */
 @media (max-width: 768px) {
-  .nav-text {
+  .mobile-menu-btn {
+    display: block;
+  }
+
+  .navbar-content {
+    position: fixed;
+    top: 60px; /* Navbar yüksekliği kadar */
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     display: none;
-  }
-  
-  .navbar-container {
-    padding: 0.5rem;
-  }
-  
-  .nav-items {
+    flex-direction: column;
     gap: 1rem;
   }
-  
+
+  .navbar-content.active {
+    display: flex;
+  }
+
+  .nav-items {
+    flex-direction: column;
+    width: 100%;
+    gap: 1rem;
+  }
+
+  .nav-item {
+    width: 100%;
+    padding: 0.5rem;
+  }
+
+  .nav-text {
+    display: inline; /* Mobilde metinleri göster */
+  }
+
+  .cart-badge {
+    position: relative;
+    top: 0;
+    right: 0;
+    margin-left: 0.5rem;
+  }
+
+  .nav-dropdown {
+    width: 100%;
+  }
+
   .dropdown-content {
-    right: -100%;
+    position: relative;
+    width: 100%;
+    box-shadow: none;
+    display: none;
+  }
+
+  .nav-dropdown:hover .dropdown-content {
+    display: none;
+  }
+
+  .nav-dropdown.active .dropdown-content {
+    display: block;
+  }
+
+  .auth-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .nav-button {
+    width: 100%;
+    text-align: center;
   }
 } 

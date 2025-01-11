@@ -25,7 +25,8 @@ import {
   faBox,
   faMapMarkerAlt,
   faCreditCard,
-  faSignOutAlt 
+  faSignOutAlt,
+  faBars
 } from '@fortawesome/free-solid-svg-icons';
 
 const App = () => {
@@ -33,6 +34,8 @@ const App = () => {
   const [userId, setUserId] = useState(null);
   const [username, setUsername] = useState('');
   const [cart, setCart] = useState([]);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -80,17 +83,28 @@ const App = () => {
     setCart((prev) => prev.filter((item) => item.id !== productId));
   };
 
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const toggleDropdown = () => {
+    setActiveDropdown(!activeDropdown);
+  };
+
   return (
     <Router>
       <div>
-        {/* Navbar */}
         <nav className="navbar">
           <div className="navbar-container">
             <Link to="/" className="navbar-brand">
               <span className="brand-text">E-Gokay</span>
             </Link>
 
-            <div className="navbar-content">
+            <button className="mobile-menu-btn" onClick={toggleMobileMenu}>
+              <FontAwesomeIcon icon={faBars} />
+            </button>
+
+            <div className={`navbar-content ${isMobileMenuOpen ? 'active' : ''}`}>
               {!isLoggedIn ? (
                 <div className="auth-buttons">
                   <Link to="/login" className="nav-button">
@@ -102,22 +116,22 @@ const App = () => {
                 </div>
               ) : (
                 <div className="nav-items">
-                  <Link to="/favorites" className="nav-item">
-                    <i className="fas fa-heart"></i>
+                  <Link to="/favorites" className="nav-item" onClick={() => setIsMobileMenuOpen(false)}>
+                    <FontAwesomeIcon icon={faHeart} />
                     <span className="nav-text">Favoriler</span>
                   </Link>
                   
-                  <Link to="/cart" className="nav-item cart-item">
-                    <i className="fas fa-shopping-cart"></i>
+                  <Link to="/cart" className="nav-item cart-item" onClick={() => setIsMobileMenuOpen(false)}>
+                    <FontAwesomeIcon icon={faShoppingCart} />
                     <span className="nav-text">Sepet</span>
                     {cart.length > 0 && <span className="cart-badge">{cart.length}</span>}
                   </Link>
                   
-                  <div className="nav-dropdown">
-                    <button className="nav-dropdown-btn">
-                      <i className="fas fa-user"></i>
+                  <div className={`nav-dropdown ${activeDropdown ? 'active' : ''}`}>
+                    <button className="nav-dropdown-btn" onClick={toggleDropdown}>
+                      <FontAwesomeIcon icon={faUser} />
                       <span className="nav-text">{username}</span>
-                      <i className="fas fa-chevron-down"></i>
+                      <FontAwesomeIcon icon={faChevronDown} />
                     </button>
                     <div className="dropdown-content">
                       <Link to="/orders" className="dropdown-item">
@@ -140,7 +154,6 @@ const App = () => {
           </div>
         </nav>
 
-        {/* Rotalar */}
         <Routes>
           <Route
             path="/"

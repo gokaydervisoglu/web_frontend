@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import API from '../api';
-import './Favorites.css';
+import '../styles/Favorites.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faHeart,
@@ -8,7 +8,10 @@ import {
   faBoxOpen,
   faMoneyBill,
   faWarehouse,
-  faTrash
+  faTrash,
+  faCheck,
+  faExclamationTriangle,
+  faTimes
 } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,6 +19,7 @@ const Favorites = ({ userId }) => {
   const [favorites, setFavorites] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [alert, setAlert] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,20 +44,26 @@ const Favorites = ({ userId }) => {
     }
   };
 
+  const showAlert = (message, type = 'success') => {
+    setAlert({ message, type });
+    setTimeout(() => {
+      setAlert(null);
+    }, 3000);
+  };
+
   const handleRemoveFavorite = async (documentId) => {
-    if (window.confirm('Bu ürünü favorilerinizden kaldırmak istediğinizden emin misiniz?')) {
-      try {
-        const token = localStorage.getItem('token');
-        await API.delete(`/api/favorites/${documentId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setFavorites(prev => prev.filter(fav => fav.documentId !== documentId));
-      } catch (err) {
-        console.error('Favori silinirken hata:', err);
-        setError('Favori silinirken bir hata oluştu.');
-      }
+    try {
+      const token = localStorage.getItem('token');
+      await API.delete(`/api/favorites/${documentId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setFavorites(prev => prev.filter(fav => fav.documentId !== documentId));
+      showAlert('Ürün favorilerden kaldırıldı');
+    } catch (err) {
+      console.error('Favori silinirken hata:', err);
+      showAlert('Favori silinirken bir hata oluştu', 'warning');
     }
   };
 
@@ -74,6 +84,26 @@ const Favorites = ({ userId }) => {
 
   return (
     <div className="favorites-container">
+      {alert && (
+        <div className="alert-overlay">
+          <div className={`alert ${alert.type}`}>
+            <FontAwesomeIcon 
+              icon={alert.type === 'success' ? faCheck : faExclamationTriangle} 
+              className="alert-icon"
+            />
+            <div className="alert-content">
+              <p className="alert-message">{alert.message}</p>
+            </div>
+            <button 
+              className="alert-close"
+              onClick={() => setAlert(null)}
+            >
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="favorites-header">
         <h1>
           <FontAwesomeIcon icon={faHeart} className="header-icon" />

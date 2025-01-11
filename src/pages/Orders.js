@@ -1,7 +1,7 @@
 // Orders.js
 import React, { useState, useEffect } from 'react';
 import API from '../api';
-import './Orders.css';
+import '../styles/Orders.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faBox, 

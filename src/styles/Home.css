@@ -1,0 +1,343 @@
+/* Ana container stilleri */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Bölüm başlıkları */
+.section-title {
+  font-size: 24px;
+  color: #333;
+  margin: 40px 0 20px;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Kampanyalar bölümü */
+.campaigns-container {
+  margin: 40px 0;
+  padding: 30px 0;
+  background-color: #f8f9fa;
+}
+
+.campaigns-row {
+  display: flex;
+  gap: 25px;
+  overflow-x: auto;
+  padding: 20px;
+  scrollbar-width: thin;
+  scroll-behavior: smooth;
+}
+
+.campaigns-row::-webkit-scrollbar {
+  height: 6px;
+}
+
+.campaigns-row::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.campaigns-row::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.campaign-item {
+  min-width: 300px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.campaign-item:hover {
+  transform: translateY(-5px);
+}
+
+.campaign-card {
+  position: relative;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.campaign-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.campaign-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  padding: 20px;
+  color: white;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.campaign-title {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.campaign-details {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.campaign-card:hover .campaign-overlay {
+  transform: translateY(0);
+}
+
+.campaign-card:hover .campaign-image {
+  transform: scale(1.05);
+}
+
+/* Kategoriler bölümü */
+.categories-section {
+  padding: 30px 0;
+  background-color: white;
+}
+
+.categories-row {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.category-btn {
+  padding: 8px 20px;
+  border: 2px solid #007bff;
+  border-radius: 25px;
+  background: white;
+  color: #007bff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.category-btn:hover {
+  background: #007bff;
+  color: white;
+}
+
+.category-btn.active {
+  background: #007bff;
+  color: white;
+}
+
+/* Ürünler grid */
+.products-section {
+  padding: 30px 0;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 25px;
+  padding: 20px 0;
+}
+
+/* Ürün kartı stilleri */
+.product-card {
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+}
+
+.product-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.product-title {
+  font-size: 16px;
+  color: #333;
+  margin: 0;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.product-title:hover {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.favorite-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  font-size: 18px;
+}
+
+.favorite-active {
+  color: #ff4757;
+}
+
+.product-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.product-price {
+  font-size: 20px;
+  font-weight: bold;
+  color: #2ecc71;
+}
+
+.product-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.quantity-control input {
+  width: 60px;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.add-to-cart-btn {
+  flex: 1;
+  padding: 8px 15px;
+  background: #2ecc71;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.add-to-cart-btn:hover {
+  background: #27ae60;
+}
+
+/* Responsive düzenlemeler */
+@media (max-width: 768px) {
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+  }
+
+  .campaign-item {
+    min-width: 240px;
+  }
+
+  .section-title {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .campaign-item {
+    min-width: 200px;
+  }
+}
+
+/* Alert stilleri */
+.alert-overlay {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  animation: slideIn 0.3s ease-out;
+}
+
+.alert {
+  background: white;
+  border-radius: 8px;
+  padding: 15px 25px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 300px;
+}
+
+.alert.success {
+  border-left: 4px solid #2ecc71;
+}
+
+.alert.warning {
+  border-left: 4px solid #f1c40f;
+}
+
+.alert-icon {
+  font-size: 20px;
+}
+
+.alert.success .alert-icon {
+  color: #2ecc71;
+}
+
+.alert.warning .alert-icon {
+  color: #f1c40f;
+}
+
+.alert-content {
+  flex: 1;
+}
+
+.alert-message {
+  margin: 0;
+  color: #333;
+  font-size: 14px;
+}
+
+.alert-close {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 16px;
+  transition: color 0.2s;
+}
+
+.alert-close:hover {
+  color: #333;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}

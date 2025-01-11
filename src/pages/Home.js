@@ -1,11 +1,12 @@
 // Home.js
 import React, { useState, useEffect } from 'react';
 import API from '../api';
-import './Home.css';
+import '../styles/Home.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart as solidHeart } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as regularHeart } from '@fortawesome/free-regular-svg-icons';
 import { useNavigate } from 'react-router-dom';
+import { faCheck, faExclamationTriangle, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 const Home = ({ userId, addToCart }) => {
   const [products, setProducts] = useState([]);
@@ -14,6 +15,7 @@ const Home = ({ userId, addToCart }) => {
   const [campaigns, setCampaigns] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [quantities, setQuantities] = useState({});
+  const [alert, setAlert] = useState(null);
 
   const navigate = useNavigate();
 
@@ -90,6 +92,13 @@ const Home = ({ userId, addToCart }) => {
     fetchCampaigns();
   }, [userId]);
 
+  const showAlert = (message, type = 'success') => {
+    setAlert({ message, type });
+    setTimeout(() => {
+      setAlert(null);
+    }, 3000);
+  };
+
   const handleToggleFavorite = async (productId) => {
     const isFavorite = favorites.includes(productId);
 
@@ -115,7 +124,7 @@ const Home = ({ userId, addToCart }) => {
           });
 
           setFavorites((prev) => prev.filter((id) => id !== productId));
-          alert('Ürün favorilerden kaldırıldı!');
+          showAlert('Ürün favorilerden kaldırıldı!');
         }
       } else {
         const response = await API.post(
@@ -135,12 +144,12 @@ const Home = ({ userId, addToCart }) => {
 
         if (response.status === 200 || response.status === 201) {
           setFavorites((prev) => [...prev, productId]);
-          alert('Ürün favorilere eklendi!');
+          showAlert('Ürün favorilere eklendi!');
         }
       }
     } catch (err) {
       console.error('Favori işlemi sırasında hata:', err);
-      alert('Favori işlemi sırasında bir hata oluştu.');
+      showAlert('Favori işlemi sırasında bir hata oluştu.', 'warning');
     }
   };
 
@@ -151,7 +160,7 @@ const Home = ({ userId, addToCart }) => {
   /*DUZELTME*/
   const handleAddToCart = (product) => {
     if (!userId) {
-      alert("Sepete ürün eklemek için giriş yapmalısınız.");
+      showAlert("Sepete ürün eklemek için giriş yapmalısınız.", "warning");
       navigate("/login");
       return;
     }
@@ -159,7 +168,7 @@ const Home = ({ userId, addToCart }) => {
     const quantity = quantities[product.id] || 1;
     const productWithQuantity = { ...product, quantity };
     addToCart(productWithQuantity);
-    alert(`${quantity} adet ${product.product_name} sepete eklendi.`);
+    showAlert(`${quantity} adet ${product.product_name} sepete eklendi.`);
   };
 
   const handleGoToDetail = (productId) => {
@@ -174,6 +183,27 @@ const Home = ({ userId, addToCart }) => {
 
   return (
     <div>
+      {/* Alert komponenti */}
+      {alert && (
+        <div className="alert-overlay">
+          <div className={`alert ${alert.type}`}>
+            <FontAwesomeIcon 
+              icon={alert.type === 'success' ? faCheck : faExclamationTriangle} 
+              className="alert-icon"
+            />
+            <div className="alert-content">
+              <p className="alert-message">{alert.message}</p>
+            </div>
+            <button 
+              className="alert-close"
+              onClick={() => setAlert(null)}
+            >
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Kampanyalar */}
       <div className="campaigns-container">
         <h2 className="section-title">Kampanyalar</h2>
@@ -183,7 +213,7 @@ const Home = ({ userId, addToCart }) => {
               const { campaign_image, campaign_description, documentId } = campaign;
               const imageFormats = campaign_image?.formats || {};
               const thumbnail = imageFormats.thumbnail?.url || campaign_image?.url;
-              const imageUrl = `${process.env.REACT_APP_API_URL}${thumbnail}`;
+              const imageUrl = `http://localhost:1337${thumbnail}`;
               const description = campaign_description || 'Kampanya';
 
               return (
@@ -195,7 +225,8 @@ const Home = ({ userId, addToCart }) => {
                   <div className="campaign-card">
                     <img src={imageUrl} alt={description} className="campaign-image" />
                     <div className="campaign-overlay">
-                      <p>{description}</p>
+                      <h3 className="campaign-title">{description}</h3>
+                      <span className="campaign-details">Detaylar için tıklayın</span>
                     </div>
                   </div>
                 </div>
@@ -240,7 +271,12 @@ const Home = ({ userId, addToCart }) => {
               products.map((product) => (
                 <div className="product-card" key={product.id}>
                   <div className="product-header">
-                    <h3 className="product-title">{product.product_name}</h3>
+                    <h3 
+                      className="product-title"
+                      onClick={() => handleGoToDetail(product.id)}
+                    >
+                      {product.product_name}
+                    </h3>
                     <button
                       className="favorite-btn"
                       onClick={(e) => {
