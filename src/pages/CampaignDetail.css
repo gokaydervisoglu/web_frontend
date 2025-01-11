@@ -26,32 +26,39 @@
   }
   
   .campaign-detail-container {
+    max-width: 1200px;
+    margin: 0 auto;
     padding: 20px;
   }
   
   .campaign-detail-content {
+    background-color: white;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 20px;
     text-align: center;
   }
   
-  .campaign-detail-image {
-    max-width: 80%;
+  .campaign-image {
+    max-width: 100%;
     border-radius: 8px;
     margin-bottom: 20px;
   }
   
   .campaign-description {
-    font-size: 1.2em;
-    color: #555;
+    color: #666;
+    margin: 20px 0;
+    line-height: 1.6;
   }
   
   .back-button {
-    margin-bottom: 20px;
     background-color: #007bff;
     color: white;
-    padding: 10px 20px;
     border: none;
-    border-radius: 5px;
+    padding: 8px 16px;
+    border-radius: 4px;
     cursor: pointer;
+    margin-top: 20px;
   }
   
   .back-button:hover {

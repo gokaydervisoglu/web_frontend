@@ -1,21 +1,14 @@
 // Login.js
 import React, { useState } from 'react';
-import API from '../api';
-import { useNavigate, Link } from 'react-router-dom';
-import '../styles/Auth.css';
+import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faEnvelope,
-  faLock,
-  faSignInAlt
-} from '@fortawesome/free-solid-svg-icons';
-import Toast from '../components/Toast';
+import { faUser, faLock } from '@fortawesome/free-solid-svg-icons';
+import API from '../api';
+import './auth.css';
 
 const Login = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
-  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -25,74 +18,44 @@ const Login = ({ onLogin }) => {
         password,
       });
       onLogin(response.data.jwt);
-      setToast({ 
-        show: true, 
-        message: 'Giriş başarılı! Yönlendiriliyorsunuz...', 
-        type: 'success' 
-      });
-      setTimeout(() => navigate('/'), 1500);
+      alert('Giriş Başarılı!');
     } catch (error) {
-      console.error('Login error:', error);
-      setToast({ 
-        show: true, 
-        message: 'Giriş başarısız! Bilgilerinizi kontrol edin.', 
-        type: 'error' 
-      });
+      console.error('Login error:', error.response ? error.response.data : error.message);
+      alert('Giriş Başarısız!');
     }
   };
 
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <div className="auth-header">
-          <h1>Hoş Geldiniz</h1>
-          <p>Hesabınıza giriş yapın</p>
-        </div>
-
+        <h2 className="auth-title">Giriş Yap</h2>
         <form className="auth-form" onSubmit={handleLogin}>
-          <div className="form-group">
-            <FontAwesomeIcon icon={faEnvelope} className="input-icon" />
+          <div className="input-group">
+            <FontAwesomeIcon icon={faUser} className="input-icon" />
             <input
               type="email"
-              placeholder="E-posta adresiniz"
+              placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
-
-          <div className="form-group">
+          <div className="input-group">
             <FontAwesomeIcon icon={faLock} className="input-icon" />
             <input
               type="password"
-              placeholder="Şifreniz"
+              placeholder="Şifre"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
-
-          <button type="submit" className="submit-btn">
-            <FontAwesomeIcon icon={faSignInAlt} />
-            Giriş Yap
-          </button>
+          <button type="submit" className="auth-button">Giriş Yap</button>
         </form>
-
         <p className="auth-redirect">
-          Hesabınız yok mu?{' '}
-          <Link to="/register" className="auth-link">
-            Hemen kayıt olun
-          </Link>
+          Hesabınız yok mu? <Link to="/register" className="auth-link">Kayıt Ol</Link>
         </p>
       </div>
-
-      {toast.show && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast({ show: false, message: '', type: 'success' })}
-        />
-      )}
     </div>
   );
 };

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import API from '../api';
-import '../styles/CampaignDetail.css';
-
+import './CampaignDetail.css';
 
 const CampaignDetail = () => {
   const { campaignId } = useParams();
@@ -53,10 +52,8 @@ const CampaignDetail = () => {
   // Kampanya Verisini İşle
   const { campaign_image, campaign_description } = campaign;
   const imageUrl = campaign_image?.url
-    ? `${process.env.REACT_APP_API_URL}${campaign_image.url}`
+    ? `http://localhost:1337${campaign_image.url}`
     : null;
-    
-    
 
   return (
     <div className="campaign-detail-container">
@@ -64,7 +61,7 @@ const CampaignDetail = () => {
       <div className="campaign-detail-content">
         {/* Resim */}
         {imageUrl && (
-          <img src={imageUrl} alt="Kampanya Resmi" className="campaign-detail-image" />
+          <img src={imageUrl} alt="Kampanya Resmi" className="campaign-image" />
         )}
 
         {/* Açıklama */}

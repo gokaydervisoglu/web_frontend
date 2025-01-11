@@ -1,12 +1,16 @@
 // Home.js
 import React, { useState, useEffect } from 'react';
 import API from '../api';
-import '../styles/Home.css';
+import './Home.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHeart as solidHeart } from '@fortawesome/free-solid-svg-icons';
+import { 
+  faHeart as solidHeart, 
+  faShoppingCart, 
+  faTags, 
+  faListAlt 
+} from '@fortawesome/free-solid-svg-icons';
 import { faHeart as regularHeart } from '@fortawesome/free-regular-svg-icons';
 import { useNavigate } from 'react-router-dom';
-import { faCheck, faExclamationTriangle, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 const Home = ({ userId, addToCart }) => {
   const [products, setProducts] = useState([]);
@@ -15,9 +19,51 @@ const Home = ({ userId, addToCart }) => {
   const [campaigns, setCampaigns] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [quantities, setQuantities] = useState({});
-  const [alert, setAlert] = useState(null);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        
+        // Kategorileri al
+        const categoriesResponse = await API.get('/api/categories', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setCategories(categoriesResponse.data.data);
+
+        // Favorileri al
+        if (userId) {
+          const favoritesResponse = await API.get(
+            `/api/favorites?populate=*&filters[user][id][$eq]=${userId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          const favoriteProductIds = favoritesResponse.data.data
+            .map((fav) => fav.product?.id)
+            .filter(Boolean);
+          setFavorites(favoriteProductIds);
+        }
+
+        // Kampanyaları al
+        const campaignsResponse = await API.get('/api/campaigns?populate=*', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setCampaigns(campaignsResponse.data.data);
+
+      } catch (err) {
+        console.error('Veri yüklenirken hata:', err);
+      }
+    };
+
+    fetchData();
+  }, [userId]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -38,66 +84,7 @@ const Home = ({ userId, addToCart }) => {
     };
 
     fetchProducts();
-  }, [userId, selectedCategory]);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await API.get('/api/categories', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setCategories(response.data.data);
-      } catch (err) {
-        console.error('Kategoriler alınırken bir hata oluştu:', err);
-      }
-    };
-
-    const fetchFavorites = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await API.get(
-          `/api/favorites?populate=*&filters[user][id][$eq]=${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        const favoriteProductIds = response.data.data
-          .map((fav) => fav.product?.id)
-          .filter(Boolean);
-        setFavorites(favoriteProductIds);
-      } catch (err) {
-        console.error('Favoriler alınırken hata:', err);
-      }
-    };
-
-    const fetchCampaigns = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await API.get('/api/campaigns?populate=*', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setCampaigns(response.data.data);
-      } catch (err) {
-        console.error('Kampanyalar yüklenirken bir hata oluştu:', err);
-      }
-    };
-
-    fetchCategories();
-    fetchFavorites();
-    fetchCampaigns();
-  }, [userId]);
-
-  const showAlert = (message, type = 'success') => {
-    setAlert({ message, type });
-    setTimeout(() => {
-      setAlert(null);
-    }, 3000);
-  };
+  }, [selectedCategory]);
 
   const handleToggleFavorite = async (productId) => {
     const isFavorite = favorites.includes(productId);
@@ -124,7 +111,7 @@ const Home = ({ userId, addToCart }) => {
           });
 
           setFavorites((prev) => prev.filter((id) => id !== productId));
-          showAlert('Ürün favorilerden kaldırıldı!');
+          alert('Ürün favorilerden kaldırıldı!');
         }
       } else {
         const response = await API.post(
@@ -144,12 +131,12 @@ const Home = ({ userId, addToCart }) => {
 
         if (response.status === 200 || response.status === 201) {
           setFavorites((prev) => [...prev, productId]);
-          showAlert('Ürün favorilere eklendi!');
+          alert('Ürün favorilere eklendi!');
         }
       }
     } catch (err) {
       console.error('Favori işlemi sırasında hata:', err);
-      showAlert('Favori işlemi sırasında bir hata oluştu.', 'warning');
+      alert('Favori işlemi sırasında bir hata oluştu.');
     }
   };
 
@@ -160,7 +147,7 @@ const Home = ({ userId, addToCart }) => {
   /*DUZELTME*/
   const handleAddToCart = (product) => {
     if (!userId) {
-      showAlert("Sepete ürün eklemek için giriş yapmalısınız.", "warning");
+      alert("Sepete ürün eklemek için giriş yapmalısınız.");
       navigate("/login");
       return;
     }
@@ -168,7 +155,7 @@ const Home = ({ userId, addToCart }) => {
     const quantity = quantities[product.id] || 1;
     const productWithQuantity = { ...product, quantity };
     addToCart(productWithQuantity);
-    showAlert(`${quantity} adet ${product.product_name} sepete eklendi.`);
+    alert(`${quantity} adet ${product.product_name} sepete eklendi.`);
   };
 
   const handleGoToDetail = (productId) => {
@@ -182,69 +169,50 @@ const Home = ({ userId, addToCart }) => {
   
 
   return (
-    <div>
-      {/* Alert komponenti */}
-      {alert && (
-        <div className="alert-overlay">
-          <div className={`alert ${alert.type}`}>
-            <FontAwesomeIcon 
-              icon={alert.type === 'success' ? faCheck : faExclamationTriangle} 
-              className="alert-icon"
-            />
-            <div className="alert-content">
-              <p className="alert-message">{alert.message}</p>
-            </div>
-            <button 
-              className="alert-close"
-              onClick={() => setAlert(null)}
-            >
-              <FontAwesomeIcon icon={faTimes} />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Kampanyalar */}
-  
-        <h2 className="section-title">Kampanyalar</h2>
+    <div className="container">
+      <h2 className="section-title">
+        <FontAwesomeIcon icon={faTags} className="section-icon" /> Kampanyalar
+      </h2>
+      
+      {/* Kampanyalar bölümü */}
+      <div className="campaigns-container">
         <div className="campaigns-row">
           {campaigns.length > 0 ? (
             campaigns.map((campaign) => {
               const { campaign_image, campaign_description, documentId } = campaign;
               const imageFormats = campaign_image?.formats || {};
               const thumbnail = imageFormats.thumbnail?.url || campaign_image?.url;
-              const imageUrl = `${process.env.REACT_APP_API_URL}${thumbnail}`;
+              const imageUrl = `http://localhost:1337${thumbnail}`;
               const description = campaign_description || 'Kampanya';
 
               return (
                 <div
                   key={documentId}
-                  className="campaign-item"
+                  className="campaign-item-home"
                   onClick={() => handleGoToCampaignDetail(documentId)}
+
                 >
-                  <div className="campaign-card">
-                    <img src={imageUrl} alt={description} className="campaign-image" />
-                    <div className="campaign-overlay">
-                      <h3 className="campaign-title">{description}</h3>
-                      <span className="campaign-details">Detaylar için tıklayın</span>
-                    </div>
-                  </div>
+                  <img src={imageUrl} alt={description} className="campaign-image-home" />
                 </div>
               );
             })
           ) : (
-            <p className="no-data">Kampanya bulunmamaktadır.</p>
+            <p>Kampanya bulunmamaktadır.</p>
           )}
         </div>
+      </div>
 
-      {/* Kategoriler bölümü güncellemesi */}
-      <div className="categories-section">
+      <h2 className="section-title">
+        <FontAwesomeIcon icon={faListAlt} className="section-icon" /> Kategoriler
+      </h2>
+      
+      {/* Kategoriler bölümü */}
+      <div className="category-button">
         <div className="container">
-          <h2 className="section-title">Kategoriler</h2>
-          <div className="categories-row">
+          <div className="category-row">
             <button
               onClick={() => setSelectedCategory(null)}
-              className={`category-btn ${selectedCategory === null ? 'active' : ''}`}
+              className={selectedCategory === null ? 'active-category' : ''}
             >
               Tümü
             </button>
@@ -252,7 +220,7 @@ const Home = ({ userId, addToCart }) => {
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.id)}
-                className={`category-btn ${selectedCategory === category.id ? 'active' : ''}`}
+                className={selectedCategory === category.id ? 'active-category' : ''}
               >
                 {category.category_name}
               </button>
@@ -261,67 +229,53 @@ const Home = ({ userId, addToCart }) => {
         </div>
       </div>
 
-      {/* Ürünler bölümü güncellemesi */}
-     
-        <div className="container">
-          <h2 className="section-title">Ürünler</h2>
-          <div className="products-grid">
-            {products.length > 0 ? (
-              products.map((product) => (
-                <div className="product-card" key={product.id}>
-                  <div className="product-header">
-                    <h3 
-                      className="product-title"
-                      onClick={() => handleGoToDetail(product.id)}
-                    >
-                      {product.product_name}
-                    </h3>
-                    <button
-                      className="favorite-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleToggleFavorite(product.id);
-                      }}
-                    >
-                      <FontAwesomeIcon
-                        icon={favorites.includes(product.id) ? solidHeart : regularHeart}
-                        className={favorites.includes(product.id) ? 'favorite-active' : ''}
-                      />
-                    </button>
-                  </div>
-                  
-                  <div className="product-content" onClick={() => handleGoToDetail(product.id)}>
-                    <div className="product-price">₺{product.price}</div>
-                    
-                    <div className="product-actions">
-                      <div className="quantity-control">
-                        <input
-                          type="number"
-                          min="1"
-                          value={quantities[product.id] || 1}
-                          onChange={(e) => handleQuantityChange(product.id, parseInt(e.target.value, 10))}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      </div>
-                      
-                      <button 
-                        className="add-to-cart-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleAddToCart(product);
-                        }}
-                      >
-                        Sepete Ekle
-                      </button>
-                    </div>
-                  </div>
+      <h2 className="section-title">Ürünlerimiz</h2>
+      
+      <div className="products-grid">
+        {products.length > 0 ? (
+          products.map((product) => (
+            <div className="home-product" key={product.id}>
+              <button
+                className="favorite-btn"
+                onClick={() => handleToggleFavorite(product.id)}
+              >
+                <FontAwesomeIcon
+                  icon={favorites.includes(product.id) ? solidHeart : regularHeart}
+                  color={favorites.includes(product.id) ? 'red' : 'grey'}
+                  size="lg"
+                />
+              </button>
+
+              <h2 onClick={() => handleGoToDetail(product.id)}>
+                {product.product_name}
+              </h2>
+
+              <div className="price-quantity-container">
+                <p className="price-tag">₺{product.price}</p>
+                <div className="quantity-wrapper">
+                  <input
+                    type="number"
+                    min="1"
+                    value={quantities[product.id] || 1}
+                    onChange={(e) => handleQuantityChange(product.id, parseInt(e.target.value, 10))}
+                    className="quantity-input"
+                  />
                 </div>
-              ))
-            ) : (
-              <p className="no-data">Yükleniyor...</p>
-            )}
-          </div>
-        </div>
+              </div>
+
+              <button 
+                className="add-to-cart-btn"
+                onClick={() => handleAddToCart(product)}
+              >
+                <FontAwesomeIcon icon={faShoppingCart} />
+                Sepete Ekle
+              </button>
+            </div>
+          ))
+        ) : (
+          <p className="loading-text">Yükleniyor...</p>
+        )}
+      </div>
     </div>
   );
 };

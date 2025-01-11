@@ -1,116 +1,64 @@
 // Cart.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/Cart.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faShoppingCart,
-  faTrash,
-  faCreditCard,
-  faBox,
-  faMoneyBill,
-  faArrowLeft
-} from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faCreditCard } from '@fortawesome/free-solid-svg-icons';
+import './Cart.css';
 
 const Cart = ({ cart, removeFromCart }) => {
   const navigate = useNavigate();
-
-  const calculateTotal = () => {
-    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
-  };
 
   const handleCheckout = () => {
     navigate('/payment', { state: { cart } });
   };
 
-  const handleContinueShopping = () => {
-    navigate('/');
-  };
+  const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   return (
     <div className="cart-container">
-      <div className="cart-header">
-        <h1>
-          <FontAwesomeIcon icon={faShoppingCart} className="header-icon" />
-          Alışveriş Sepetim
-        </h1>
-        <span className="item-count">{cart.length} Ürün</span>
-      </div>
-
-      {cart.length > 0 ? (
-        <div className="cart-content">
-          <div className="cart-items">
-            {cart.map((item) => (
-              <div className="cart-item" key={item.id}>
-                <div className="item-details">
-                  <div className="item-header">
+      <h1 className="section-title">Sepetim</h1>
+      
+      <div className="cart-content">
+        {cart.length > 0 ? (
+          <>
+            <div className="cart-items">
+              {cart.map((item) => (
+                <div key={item.id} className="cart-item">
+                  <div className="item-details">
                     <h2>{item.product_name}</h2>
-                    <button
-                      className="remove-btn"
-                      onClick={() => removeFromCart(item.id)}
-                    >
-                      <FontAwesomeIcon icon={faTrash} />
-                    </button>
-                  </div>
-
-                  <div className="item-info">
-                    <div className="info-row">
-                      <FontAwesomeIcon icon={faMoneyBill} className="info-icon" />
-                      <span className="price">₺{item.price}</span>
-                    </div>
-                    <div className="info-row">
-                      <FontAwesomeIcon icon={faBox} className="info-icon" />
-                      <span className="quantity">Adet: {item.quantity}</span>
+                    <div className="item-info">
+                      <p className="price">Fiyat: ₺{item.price}</p>
+                      <p className="quantity">Adet: {item.quantity}</p>
+                      <p className="total">Toplam: ₺{item.price * item.quantity}</p>
                     </div>
                   </div>
-
-                  <div className="item-total">
-                    <span>Toplam:</span>
-                    <span className="total-price">₺{item.price * item.quantity}</span>
-                  </div>
+                  <button 
+                    className="remove-button"
+                    onClick={() => removeFromCart(item.id)}
+                  >
+                    <FontAwesomeIcon icon={faTrash} />
+                  </button>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="cart-summary">
-            <h3>Sipariş Özeti</h3>
-            <div className="summary-details">
-              <div className="summary-row">
-                <span>Ara Toplam</span>
-                <span>₺{calculateTotal()}</span>
-              </div>
-              <div className="summary-row">
-                <span>Kargo</span>
-                <span>Ücretsiz</span>
-              </div>
-              <div className="summary-total">
-                <span>Toplam</span>
-                <span>₺{calculateTotal()}</span>
-              </div>
+              ))}
             </div>
-
-            <button className="checkout-btn" onClick={handleCheckout}>
-              <FontAwesomeIcon icon={faCreditCard} />
-              Ödemeye Geç
-            </button>
-
-            <button className="continue-shopping-btn" onClick={handleContinueShopping}>
-              <FontAwesomeIcon icon={faArrowLeft} />
-              Alışverişe Devam Et
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="empty-cart">
-          <FontAwesomeIcon icon={faShoppingCart} className="empty-cart-icon" />
-          <p>Sepetinizde ürün bulunmamaktadır.</p>
-          <button className="continue-shopping-btn" onClick={handleContinueShopping}>
-            <FontAwesomeIcon icon={faArrowLeft} />
-            Alışverişe Başla
-          </button>
-        </div>
-      )}
+            
+            <div className="cart-summary">
+              <div className="total-amount">
+                <h3>Toplam Tutar:</h3>
+                <p>₺{totalAmount}</p>
+              </div>
+              <button 
+                className="checkout-button"
+                onClick={handleCheckout}
+              >
+                <FontAwesomeIcon icon={faCreditCard} /> Ödeme Yap
+              </button>
+            </div>
+          </>
+        ) : (
+          <p className="empty-cart">Sepetiniz boş.</p>
+        )}
+      </div>
     </div>
   );
 };

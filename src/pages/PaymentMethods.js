@@ -1,16 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import API from '../api';
-import '../styles/PaymentMethods.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faCreditCard,
-  faPlus,
-  faTrash,
-  faTimes,
-  faUser,
-  faCalendarAlt,
-  faLock
-} from '@fortawesome/free-solid-svg-icons';
+import { faCreditCard, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import API from '../api';
+import './PaymentMethods.css';
 
 const PaymentMethods = ({ userId }) => {
   const [paymentMethods, setPaymentMethods] = useState([]);
@@ -20,32 +12,31 @@ const PaymentMethods = ({ userId }) => {
     expiry_month: '',
     expiry_year: '',
     cvv: '',
-    unit_price: 10000, // Varsayılan bakiye
   });
   const [error, setError] = useState(null);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false); // Popup kontrolü
 
   useEffect(() => {
-    fetchPaymentMethods();
-  }, [userId]);
+    const fetchPaymentMethods = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await API.get(
+          `/api/payment-methods?filters[users_permissions_user][id][$eq]=${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setPaymentMethods(response.data.data);
+      } catch (err) {
+        console.error('Ödeme yöntemleri alınırken hata:', err);
+        setError('Ödeme yöntemleri alınırken bir hata oluştu.');
+      }
+    };
 
-  const fetchPaymentMethods = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await API.get(
-        `/api/payment-methods?filters[users_permissions_user][id][$eq]=${userId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setPaymentMethods(response.data.data);
-    } catch (err) {
-      console.error('Ödeme yöntemleri alınırken hata:', err);
-      setError('Ödeme yöntemleri alınırken bir hata oluştu.');
-    }
-  };
+    if (userId) fetchPaymentMethods();
+  }, [userId]);
 
   const handleAddPaymentMethod = async (e) => {
     e.preventDefault();
@@ -57,6 +48,7 @@ const PaymentMethods = ({ userId }) => {
           data: {
             ...newCard,
             users_permissions_user: userId,
+            unit_price: 10000
           },
         },
         {
@@ -65,9 +57,8 @@ const PaymentMethods = ({ userId }) => {
           },
         }
       );
-
       if (response.status === 200 || response.status === 201) {
-        alert('Kart başarıyla eklendi!');
+        alert('Kart başarıyla eklendi! Başlangıç bakiyesi: 10000 TL');
         setPaymentMethods((prev) => [...prev, response.data.data]);
         setNewCard({
           card_holder_name: '',
@@ -75,7 +66,6 @@ const PaymentMethods = ({ userId }) => {
           expiry_month: '',
           expiry_year: '',
           cvv: '',
-          unit_price: 10000,
         });
         setIsPopupOpen(false);
       }
@@ -86,7 +76,7 @@ const PaymentMethods = ({ userId }) => {
   };
 
   const handleDeletePaymentMethod = async (documentId) => {
-    if (window.confirm('Bu kartı silmek istediğinizden emin misiniz?')) {
+    if (window.confirm('Bu ödeme yöntemini silmek istediğinizden emin misiniz?')) {
       try {
         const token = localStorage.getItem('token');
         await API.delete(`/api/payment-methods/${documentId}`, {
@@ -94,6 +84,7 @@ const PaymentMethods = ({ userId }) => {
             Authorization: `Bearer ${token}`,
           },
         });
+
         alert('Kart başarıyla silindi!');
         setPaymentMethods((prev) => prev.filter((method) => method.documentId !== documentId));
       } catch (err) {
@@ -105,73 +96,47 @@ const PaymentMethods = ({ userId }) => {
 
   return (
     <div className="payment-methods-container">
-      <div className="payment-methods-header">
-        <h1>
-          <FontAwesomeIcon icon={faCreditCard} className="header-icon" />
-          Kayıtlı Kartlar
-        </h1>
-        <button className="add-card-btn" onClick={() => setIsPopupOpen(true)}>
-          <FontAwesomeIcon icon={faPlus} /> Yeni Kart Ekle
-        </button>
-      </div>
+      <h1 className="section-title">
+        <FontAwesomeIcon icon={faCreditCard} /> Kayıtlı Kartlarım
+      </h1>
+      {error && <p className="error-message">{error}</p>}
 
-      {error && <div className="error-message">{error}</div>}
+      <button className="add-button" onClick={() => setIsPopupOpen(true)}>
+        <FontAwesomeIcon icon={faPlus} /> Yeni Kart Ekle
+      </button>
 
-      <div className="cards-grid">
-        {paymentMethods.map((method) => (
-          <div className="card-item" key={method.id}>
-            <div className="card-content">
-              <div className="card-type">
+      <div className="cards-list">
+        {paymentMethods.length > 0 ? (
+          paymentMethods.map((method) => (
+            <div key={method.documentId} className="card-item">
+              <div className="card-info">
                 <FontAwesomeIcon icon={faCreditCard} className="card-icon" />
-              </div>
-              <div className="card-number">
-                **** **** **** {method.card_number.slice(-4)}
-              </div>
-              <div className="card-details">
-                <div className="card-holder">
-                  <span className="label">Kart Sahibi</span>
-                  <span className="value">{method.card_holder_name}</span>
-                </div>
-                <div className="card-expiry">
-                  <span className="label">Son Kullanma</span>
-                  <span className="value">{method.expiry_month}/{method.expiry_year}</span>
+                <div className="card-details">
+                  <h3>{method.card_holder_name}</h3>
+                  <p>**** **** **** {method.card_number.slice(-4)}</p>
+                  <p className="expiry">Son Kullanma: {method.expiry_month}/{method.expiry_year}</p>
+                  <p className="balance">Bakiye: ₺{method.unit_price?.toLocaleString('tr-TR') || '0'}</p>
                 </div>
               </div>
-              <div className="card-balance">
-                <span className="label">Bakiye</span>
-                <span className="value">₺{method.unit_price}</span>
-              </div>
-            </div>
-            <button
-              className="delete-card-btn"
-              onClick={() => handleDeletePaymentMethod(method.documentId)}
-            >
-              <FontAwesomeIcon icon={faTrash} />
-            </button>
-          </div>
-        ))}
-      </div>
-
-      {paymentMethods.length === 0 && (
-        <div className="no-cards">
-          <FontAwesomeIcon icon={faCreditCard} className="no-cards-icon" />
-          <p>Henüz kayıtlı bir kart bulunmuyor.</p>
-        </div>
-      )}
-
-      {isPopupOpen && (
-        <div className="popup-overlay">
-          <div className="popup-content">
-            <div className="popup-header">
-              <h2>Yeni Kart Ekle</h2>
-              <button className="close-btn" onClick={() => setIsPopupOpen(false)}>
-                <FontAwesomeIcon icon={faTimes} />
+              <button
+                className="pay-delete-button"
+                onClick={() => handleDeletePaymentMethod(method.documentId)}
+              >
+                <FontAwesomeIcon icon={faTrash} /> Sil
               </button>
             </div>
-            
-            <form onSubmit={handleAddPaymentMethod} className="card-form">
+          ))
+        ) : (
+          <p className="no-cards">Henüz kayıtlı bir kart bulunmamaktadır.</p>
+        )}
+      </div>
+
+      {isPopupOpen && (
+        <div className="popup">
+          <div className="popup-content">
+            <h2>Yeni Kart Ekle</h2>
+            <form onSubmit={handleAddPaymentMethod}>
               <div className="form-group">
-                <FontAwesomeIcon icon={faUser} className="input-icon" />
                 <input
                   type="text"
                   placeholder="Kart Sahibinin Adı"
@@ -180,9 +145,7 @@ const PaymentMethods = ({ userId }) => {
                   required
                 />
               </div>
-
               <div className="form-group">
-                <FontAwesomeIcon icon={faCreditCard} className="input-icon" />
                 <input
                   type="text"
                   placeholder="Kart Numarası"
@@ -191,10 +154,8 @@ const PaymentMethods = ({ userId }) => {
                   required
                 />
               </div>
-
               <div className="form-row">
                 <div className="form-group">
-                  <FontAwesomeIcon icon={faCalendarAlt} className="input-icon" />
                   <input
                     type="text"
                     placeholder="Ay (MM)"
@@ -203,9 +164,7 @@ const PaymentMethods = ({ userId }) => {
                     required
                   />
                 </div>
-
                 <div className="form-group">
-                  <FontAwesomeIcon icon={faCalendarAlt} className="input-icon" />
                   <input
                     type="text"
                     placeholder="Yıl (YY)"
@@ -214,9 +173,7 @@ const PaymentMethods = ({ userId }) => {
                     required
                   />
                 </div>
-
                 <div className="form-group">
-                  <FontAwesomeIcon icon={faLock} className="input-icon" />
                   <input
                     type="text"
                     placeholder="CVV"
@@ -226,10 +183,18 @@ const PaymentMethods = ({ userId }) => {
                   />
                 </div>
               </div>
-
-              <button type="submit" className="submit-btn">
-                Kartı Kaydet
-              </button>
+              <div className="popup-buttons">
+                <button type="submit" className="save-button">
+                  Kaydet
+                </button>
+                <button 
+                  type="button" 
+                  className="cancel-button"
+                  onClick={() => setIsPopupOpen(false)}
+                >
+                  İptal
+                </button>
+              </div>
             </form>
           </div>
         </div>

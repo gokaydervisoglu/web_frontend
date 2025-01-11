@@ -13,29 +13,17 @@ import PaymentMethods from './pages/PaymentMethods';
 import ProductDetail from './pages/ProductDetail';
 import CampaignDetail from './pages/CampaignDetail';
 import API from './api';
-import './styles/Navbar.css';
+import './App.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faSignInAlt, 
-  faUserPlus, 
-  faHeart, 
-  faShoppingCart, 
-  faUser, 
-  faChevronDown,
-  faBox,
-  faMapMarkerAlt,
-  faCreditCard,
-  faSignOutAlt,
-  faBars
-} from '@fortawesome/free-solid-svg-icons';
+import { faShoppingCart, faHeart, faClipboardList, faMapMarkerAlt, faCreditCard, faUser, faBars } from '@fortawesome/free-solid-svg-icons';
+import './styles.css';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState(null);
   const [username, setUsername] = useState('');
   const [cart, setCart] = useState([]);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -83,77 +71,123 @@ const App = () => {
     setCart((prev) => prev.filter((item) => item.id !== productId));
   };
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const toggleDropdown = () => {
-    setActiveDropdown(!activeDropdown);
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
   };
 
   return (
     <Router>
       <div>
         <nav className="navbar">
-          <div className="navbar-container">
-            <Link to="/" className="navbar-brand">
-              <span className="brand-text">E-Gokay</span>
+          <div className="nav-container">
+            <Link to="/" className="logo">
+              e-gokay
             </Link>
 
-            <button className="mobile-menu-btn" onClick={toggleMobileMenu}>
+            {/* Desktop Menu */}
+            <ul className="desktop-nav">
+              {!isLoggedIn ? (
+                <>
+                  <li><Link to="/login">Giriş Yap</Link></li>
+                  <li><Link to="/register">Kayıt Ol</Link></li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    <Link to="/favorites" onClick={toggleMenu}>
+                      <FontAwesomeIcon icon={faHeart} /> Favoriler
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/cart" className="cart-link" onClick={toggleMenu}>
+                      <FontAwesomeIcon icon={faShoppingCart} /> 
+                      Sepet ({cart.length})
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/orders" onClick={toggleMenu}>
+                      <FontAwesomeIcon icon={faClipboardList} /> Siparişler
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/addresses" onClick={toggleMenu}>
+                      <FontAwesomeIcon icon={faMapMarkerAlt} /> Adresler
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/payment-methods" onClick={toggleMenu}>
+                      <FontAwesomeIcon icon={faCreditCard} /> Ödeme Yöntemleri
+                    </Link>
+                  </li>
+                  <li className="user-name">
+                    <FontAwesomeIcon icon={faUser} /> {username}
+                  </li>
+                  <li className='logout-li'>
+                    <button className="logout-button" onClick={handleLogout}>
+                      Çıkış
+                    </button>
+                  </li>
+                </>
+              )}
+            </ul>
+
+            {/* Mobile Menu Button */}
+            <button className="mobile-menu-btn" onClick={toggleMenu}>
               <FontAwesomeIcon icon={faBars} />
             </button>
 
-            <div className={`navbar-content ${isMobileMenuOpen ? 'active' : ''}`}>
-              {!isLoggedIn ? (
-                <div className="auth-buttons">
-                  <Link to="/login" className="nav-button">
-                    <i className="fas fa-sign-in-alt"></i> Giriş
-                  </Link>
-                  <Link to="/register" className="nav-button">
-                    <i className="fas fa-user-plus"></i> Kayıt
-                  </Link>
-                </div>
-              ) : (
-                <div className="nav-items">
-                  <Link to="/favorites" className="nav-item" onClick={() => setIsMobileMenuOpen(false)}>
-                    <FontAwesomeIcon icon={faHeart} />
-                    <span className="nav-text">Favoriler</span>
-                  </Link>
-                  
-                  <Link to="/cart" className="nav-item cart-item" onClick={() => setIsMobileMenuOpen(false)}>
-                    <FontAwesomeIcon icon={faShoppingCart} />
-                    <span className="nav-text">Sepet</span>
-                    {cart.length > 0 && <span className="cart-badge">{cart.length}</span>}
-                  </Link>
-                  
-                  <div className={`nav-dropdown ${activeDropdown ? 'active' : ''}`}>
-                    <button className="nav-dropdown-btn" onClick={toggleDropdown}>
-                      <FontAwesomeIcon icon={faUser} />
-                      <span className="nav-text">{username}</span>
-                      <FontAwesomeIcon icon={faChevronDown} />
-                    </button>
-                    <div className="dropdown-content">
-                      <Link to="/orders" className="dropdown-item">
-                        <i className="fas fa-box"></i> Siparişlerim
+            {/* Mobile Menu */}
+            {isMenuOpen && (
+              <ul className="mobile-nav">
+                {!isLoggedIn ? (
+                  <>
+                    <li><Link to="/login" onClick={toggleMenu}>Giriş Yap</Link></li>
+                    <li><Link to="/register" onClick={toggleMenu}>Kayıt Ol</Link></li>
+                  </>
+                ) : (
+                  <>
+                    <li>
+                      <Link to="/favorites" onClick={toggleMenu}>
+                        <FontAwesomeIcon icon={faHeart} /> Favoriler
                       </Link>
-                      <Link to="/addresses" className="dropdown-item">
-                        <i className="fas fa-map-marker-alt"></i> Adreslerim
+                    </li>
+                    <li>
+                      <Link to="/cart" className="cart-link" onClick={toggleMenu}>
+                        <FontAwesomeIcon icon={faShoppingCart} /> 
+                        Sepet ({cart.length})
                       </Link>
-                      <Link to="/payment-methods" className="dropdown-item">
-                        <i className="fas fa-credit-card"></i> Ödeme Yöntemlerim
+                    </li>
+                    <li>
+                      <Link to="/orders" onClick={toggleMenu}>
+                        <FontAwesomeIcon icon={faClipboardList} /> Siparişler
                       </Link>
-                      <button onClick={handleLogout} className="dropdown-item logout-btn">
-                        <i className="fas fa-sign-out-alt"></i> Çıkış
+                    </li>
+                    <li>
+                      <Link to="/addresses" onClick={toggleMenu}>
+                        <FontAwesomeIcon icon={faMapMarkerAlt} /> Adresler
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/payment-methods" onClick={toggleMenu}>
+                        <FontAwesomeIcon icon={faCreditCard} /> Ödeme Yöntemleri
+                      </Link>
+                    </li>
+                    <li className="user-name">
+                      <FontAwesomeIcon icon={faUser} /> {username}
+                    </li>
+                    <li className='logout-li'>
+                      <button className="logout-button" onClick={handleLogout}>
+                        Çıkış
                       </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+                    </li>
+                  </>
+                )}
+              </ul>
+            )}
           </div>
         </nav>
 
+        {/* Rotalar */}
         <Routes>
           <Route
             path="/"

@@ -1,23 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import API from '../api';
-import '../styles/Payment.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faCreditCard,
-  faMapMarkerAlt,
-  faMoneyBill,
-  faCheck,
-  faArrowLeft,
-  faShoppingCart,
-  faExclamationCircle
-} from '@fortawesome/free-solid-svg-icons';
-import Toast from '../components/Toast';
+import { faCreditCard, faMapMarkerAlt, faMoneyBill } from '@fortawesome/free-solid-svg-icons';
+import API from '../api';
+import './Payment.css';
 
 const Payment = ({ userId }) => {
   const { state } = useLocation();
-  const navigate = useNavigate();
   const cart = state?.cart || [];
+  const navigate = useNavigate();
 
   const [savedCards, setSavedCards] = useState([]);
   const [selectedCard, setSelectedCard] = useState(null);
@@ -25,13 +16,10 @@ const Payment = ({ userId }) => {
   const [selectedAddress, setSelectedAddress] = useState('');
   const [error, setError] = useState(null);
   const [totalAmount, setTotalAmount] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchAddresses = async () => {
       try {
-        setLoading(true);
         const token = localStorage.getItem('token');
         const response = await API.get(
           `/api/user-addresses?filters[users_permissions_user][id][$eq]=${userId}&populate=*`,
@@ -45,9 +33,6 @@ const Payment = ({ userId }) => {
         console.log("Adresler:", response.data.data);
       } catch (err) {
         console.error('Adresler alınırken hata:', err);
-        setError('Bilgiler yüklenirken bir hata oluştu.');
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -79,7 +64,7 @@ const Payment = ({ userId }) => {
     };
 
     if (userId) {
-      fetchData();
+      fetchAddresses();
       fetchSavedCards();
       calculateTotalAmount();
     }
@@ -137,43 +122,43 @@ const Payment = ({ userId }) => {
     }
   };
 
-  const showToast = (message, type = 'success') => {
-    setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
-  };
-
-  const handlePayment = async () => {
-    if (!selectedCard || !selectedAddress) {
-      showToast('Lütfen kart ve adres seçimi yapınız.', 'error');
+  const updateCardBalance = async () => {
+    if (!selectedCard) {
+      alert('Lütfen bir kart seçin.');
+      return;
+    }
+    if (!selectedAddress) {
+      alert('Lütfen bir adres seçin.');
       return;
     }
 
     try {
-      setLoading(true);
       const token = localStorage.getItem('token');
-
       const paymentResponse = await API.get(
         `/api/payment-methods?filters[card_number][$eq]=${selectedCard.card_number}&filters[cvv][$eq]=${selectedCard.cvv}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-
       const paymentMethod = paymentResponse.data.data[0];
       if (!paymentMethod) {
-        showToast('Geçersiz kart bilgileri!', 'error');
+        alert('Geçersiz kart bilgileri!');
         return;
       }
 
       if (paymentMethod.unit_price < totalAmount) {
-        showToast('Kart bakiyesi yetersiz!', 'error');
+        alert('Kart bakiyesi yetersiz.');
         return;
       }
 
-      // Kart bakiyesi güncelleme
+      const updatedBalance = paymentMethod.unit_price - totalAmount;
       await API.put(
         `/api/payment-methods/${paymentMethod.documentId}`,
         {
           data: {
-            unit_price: paymentMethod.unit_price - totalAmount,
+            unit_price: updatedBalance,
           },
         },
         {
@@ -183,149 +168,100 @@ const Payment = ({ userId }) => {
         }
       );
 
-      // Sipariş oluşturma
       const newOrderId = await createOrder(token);
       await createOrderItems(newOrderId, token);
 
-      showToast('Siparişiniz başarıyla oluşturuldu!', 'success');
+      alert('Siparişiniz başarıyla oluşturuldu! Ana sayfaya yönlendiriliyorsunuz.');
+      navigate('/');
       
-      // 2 saniye sonra ana sayfaya yönlendir
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
-
     } catch (err) {
-      console.error('Ödeme işlemi sırasında hata:', err);
-      showToast('Ödeme işlemi sırasında bir hata oluştu.', 'error');
-    } finally {
-      setLoading(false);
+      console.error('İşlem sırasında hata oluştu:', err.response?.data || err.message);
+      alert('İşlem sırasında bir hata oluştu!');
     }
   };
 
   return (
     <div className="payment-container">
-      <div className="payment-header">
-        <h1>
-          <FontAwesomeIcon icon={faCreditCard} className="header-icon" />
-          Ödeme İşlemi
-        </h1>
-        <button className="back-btn" onClick={() => navigate(-1)}>
-          <FontAwesomeIcon icon={faArrowLeft} /> Geri Dön
-        </button>
-      </div>
-
-      {error && (
-        <div className="error-message">
-          <FontAwesomeIcon icon={faExclamationCircle} />
-          {error}
-        </div>
-      )}
+      <h1 className="section-title">Ödeme Sayfası</h1>
+      {error && <p className="error-message">{error}</p>}
 
       <div className="payment-content">
-        <div className="payment-details">
-          <section className="payment-section">
-            <h2>
-              <FontAwesomeIcon icon={faCreditCard} />
-              Kayıtlı Kartlar
-            </h2>
-            <div className="cards-grid">
-              {savedCards.length > 0 ? (
-                savedCards.map((card) => (
-                  <div
-                    key={card.id}
-                    className={`card-item ${selectedCard?.id === card.id ? 'selected' : ''}`}
-                    onClick={() => setSelectedCard(card)}
-                  >
-                    <div className="card-info">
-                      <span className="card-number">
-                        **** **** **** {card.card_number.slice(-4)}
-                      </span>
-                      <span className="card-name">{card.card_holder_name}</span>
-                    </div>
-                    {selectedCard?.id === card.id && (
-                      <FontAwesomeIcon icon={faCheck} className="check-icon" />
-                    )}
-                  </div>
-                ))
-              ) : (
-                <p className="no-data">Kayıtlı kart bulunamadı.</p>
-              )}
-            </div>
-          </section>
-
-          <section className="payment-section">
-            <h2>
-              <FontAwesomeIcon icon={faMapMarkerAlt} />
-              Teslimat Adresi
-            </h2>
-            <div className="addresses-grid">
-              {addresses.length > 0 ? (
-                addresses.map((addr) => (
-                  <div
-                    key={addr.id}
-                    className={`address-item ${selectedAddress === addr.id ? 'selected' : ''}`}
-                    onClick={() => setSelectedAddress(addr.id)}
-                  >
-                    <div className="address-info">
-                      <h3>{addr.address_title}</h3>
-                      <p>{addr.city} / {addr.district}</p>
-                      <p>{addr.street}</p>
-                    </div>
-                    {selectedAddress === addr.id && (
-                      <FontAwesomeIcon icon={faCheck} className="check-icon" />
-                    )}
-                  </div>
-                ))
-              ) : (
-                <p className="no-data">Kayıtlı adres bulunamadı.</p>
-              )}
-            </div>
-          </section>
-        </div>
-
-        <div className="order-summary">
+        <div className="payment-section">
           <h2>
-            <FontAwesomeIcon icon={faShoppingCart} />
-            Sipariş Özeti
+            <FontAwesomeIcon icon={faCreditCard} /> Kayıtlı Kartlar
           </h2>
-          <div className="summary-items">
-            {cart.map((item) => (
-              <div key={item.id} className="summary-item">
-                <span>{item.product_name} x {item.quantity}</span>
-                <span>₺{item.price * item.quantity}</span>
-              </div>
-            ))}
+          <div className="cards-list">
+            {savedCards.length > 0 ? (
+              savedCards.map((card) => (
+                <div 
+                  key={card.id} 
+                  className={`card-item ${selectedCard?.id === card.id ? 'selected' : ''}`}
+                >
+                  <input
+                    type="radio"
+                    name="savedCard"
+                    value={card.id}
+                    onChange={() => setSelectedCard(card)}
+                    checked={selectedCard?.id === card.id}
+                  />
+                  <label>
+                    {`${card.card_holder_name}, **** **** **** ${card.card_number.slice(-4)}`}
+                  </label>
+                </div>
+              ))
+            ) : (
+              <p className="no-data">Kayıtlı kart bulunamadı.</p>
+            )}
           </div>
-          <div className="total-amount">
-            <FontAwesomeIcon icon={faMoneyBill} />
-            <span>Toplam Tutar:</span>
-            <span className="amount">₺{totalAmount}</span>
-          </div>
-          <button
-            className="pay-btn"
-            onClick={handlePayment}
-            disabled={!selectedCard || !selectedAddress}
-          >
-            <FontAwesomeIcon icon={faCreditCard} />
-            Ödemeyi Tamamla
-          </button>
         </div>
+
+        <div className="payment-section">
+          <h2>
+            <FontAwesomeIcon icon={faMapMarkerAlt} /> Teslimat Adresi
+          </h2>
+          <div className="address-list">
+            {addresses.length > 0 ? (
+              <select
+                value={selectedAddress}
+                onChange={(e) => setSelectedAddress(e.target.value)}
+                className="address-select"
+              >
+                <option value="">Adres Seçiniz</option>
+                {addresses.map((addr) => {
+                  const { id, address_title, city, district } = addr;
+                  return (
+                    <option key={id} value={id}>
+                      {address_title} / {city || 'Bilinmeyen Şehir'} / {district || 'Bilinmeyen İlçe'}
+                    </option>
+                  );
+                })}
+              </select>
+            ) : (
+              <p className="no-data">Kayıtlı adres bulunamadı.</p>
+            )}
+          </div>
+        </div>
+
+        <div className="payment-section">
+          <h2>
+            <FontAwesomeIcon icon={faMoneyBill} /> Sipariş Özeti
+          </h2>
+          <div className="order-summary">
+            <div className="amount-display">
+              <span>Toplam Tutar:</span>
+              <span className="total-price">₺{totalAmount}</span>
+            </div>
+          </div>
+        </div>
+
+        <button
+          className="complete-payment-btn"
+          onClick={updateCardBalance}
+          disabled={!selectedCard || !selectedAddress}
+        >
+          <FontAwesomeIcon icon={faCreditCard} /> Siparişi Tamamla
+        </button>
       </div>
-
-      {toast.show && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast({ show: false, message: '', type: 'success' })}
-        />
-      )}
-
-      {loading && (
-        <div className="loading-overlay">
-          <div className="spinner"></div>
-          <p>İşleminiz gerçekleştiriliyor...</p>
-        </div>
-      )}
     </div>
   );
 };

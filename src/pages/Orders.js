@@ -1,16 +1,9 @@
 // Orders.js
 import React, { useState, useEffect } from 'react';
-import API from '../api';
-import '../styles/Orders.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faBox, 
-  faUser, 
-  faMoneyBill, 
-  faShippingFast, 
-  faCreditCard,
-  faCalendarAlt
-} from '@fortawesome/free-solid-svg-icons';
+import { faBox, faCreditCard } from '@fortawesome/free-solid-svg-icons';
+import API from '../api';
+import './Orders.css';
 
 const Orders = ({ userId }) => {
   const [orders, setOrders] = useState([]);
@@ -40,33 +33,14 @@ const Orders = ({ userId }) => {
     }
   }, [userId]);
 
-  const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-      case 'beklemede':
-        return 'status-pending';
-      case 'onaylandı':
-        return 'status-approved';
-      case 'kargoda':
-        return 'status-shipping';
-      case 'tamamlandı':
-        return 'status-completed';
-      default:
-        return 'status-default';
-    }
-  };
-
   return (
     <div className="orders-container">
-      <div className="orders-header">
-        <h1>
-          <FontAwesomeIcon icon={faBox} className="header-icon" />
-          Siparişlerim
-        </h1>
-      </div>
+      <h1 className="section-title">
+        <FontAwesomeIcon icon={faBox} /> Siparişlerim
+      </h1>
+      {error && <p className="error-message">{error}</p>}
 
-      {error && <div className="error-message">{error}</div>}
-
-      <div className="orders-list">
+      <div className="orders-grid">
         {orders.length > 0 ? (
           orders.map((order) => {
             const {
@@ -74,84 +48,30 @@ const Orders = ({ userId }) => {
               order_status,
               total_amount,
               createdAt,
-              users_permissions_user,
               user_address,
               order_items,
             } = order;
 
-            const alici = users_permissions_user?.username || users_permissions_user?.email || 'Alıcı bilgisi yok';
-            const teslimat = user_address
-              ? `${user_address.address_title}, ${user_address.city}/${user_address.district}`
-              : 'Teslimat bilgisi yok';
-
             return (
-              <div className="order-card" key={id}>
+              <div key={id} className="order-card">
                 <div className="order-header">
-                  <div className="order-id">Sipariş #{id}</div>
-                  <div className={`order-status ${getStatusColor(order_status)}`}>
-                    {order_status}
-                  </div>
+                  <span>Sipariş #{id}</span>
+                  <span className="order-status">{order_status}</span>
                 </div>
 
-                <div className="order-details">
-                  <div className="detail-item">
-                    <FontAwesomeIcon icon={faCalendarAlt} className="detail-icon" />
-                    <div className="detail-content">
-                      <span className="detail-label">Sipariş Tarihi</span>
-                      <span className="detail-value">{new Date(createdAt).toLocaleString()}</span>
-                    </div>
-                  </div>
-
-                  <div className="detail-item">
-                    <FontAwesomeIcon icon={faUser} className="detail-icon" />
-                    <div className="detail-content">
-                      <span className="detail-label">Alıcı</span>
-                      <span className="detail-value">{alici}</span>
-                    </div>
-                  </div>
-
-                  <div className="detail-item">
-                    <FontAwesomeIcon icon={faMoneyBill} className="detail-icon" />
-                    <div className="detail-content">
-                      <span className="detail-label">Toplam Tutar</span>
-                      <span className="detail-value price">₺{total_amount}</span>
-                    </div>
-                  </div>
-
-                  <div className="detail-item">
-                    <FontAwesomeIcon icon={faShippingFast} className="detail-icon" />
-                    <div className="detail-content">
-                      <span className="detail-label">Teslimat Adresi</span>
-                      <span className="detail-value">{teslimat}</span>
-                    </div>
-                  </div>
-
-                  <div className="detail-item">
-                    <FontAwesomeIcon icon={faCreditCard} className="detail-icon" />
-                    <div className="detail-content">
-                      <span className="detail-label">Ödeme Yöntemi</span>
-                      <span className="detail-value">Kredi Kartı</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="order-items">
-                  <h3>Sipariş Detayı</h3>
-                  {order_items && order_items.map((item, index) => (
-                    <div className="order-item" key={index}>
-                      <span className="item-name">Ürün ID: {item.id}</span>
-                      <span className="item-price">₺{item.unit_price}</span>
-                    </div>
-                  ))}
+                <div className="order-content">
+                  <p>Tarih: {new Date(createdAt).toLocaleString()}</p>
+                  <p>Adres: {user_address?.address_title || 'Adres bilgisi yok'}</p>
+                  <p>Ürün Sayısı: {order_items?.length || 0}</p>
+                  <p className="order-total">
+                    <FontAwesomeIcon icon={faCreditCard} /> Toplam: ₺{total_amount}
+                  </p>
                 </div>
               </div>
             );
           })
         ) : (
-          <div className="no-orders">
-            <FontAwesomeIcon icon={faBox} className="no-orders-icon" />
-            <p>Henüz siparişiniz bulunmamaktadır.</p>
-          </div>
+          <p className="no-orders">Henüz siparişiniz bulunmamaktadır.</p>
         )}
       </div>
     </div>
