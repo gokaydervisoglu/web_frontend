@@ -52,7 +52,7 @@ const CampaignDetail = () => {
   // Kampanya Verisini İşle
   const { campaign_image, campaign_description } = campaign;
   const imageUrl = campaign_image?.url
-    ? `http://localhost:1337${campaign_image.url}`
+    ? `${process.env.REACT_APP_API_URL}${campaign_image.url}`
     : null;
 
   return (
