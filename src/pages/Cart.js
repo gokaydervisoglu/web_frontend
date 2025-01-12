@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faCreditCard } from '@fortawesome/free-solid-svg-icons';
 import './Cart.css';
 import Popup from '../components/Popup';
+import API from '../api';
 
 const Cart = ({ cart, removeFromCart }) => {
   const navigate = useNavigate();
@@ -14,8 +15,47 @@ const Cart = ({ cart, removeFromCart }) => {
     setPopup({ show: true, message, type });
   };
 
-  const handleCheckout = () => {
-    navigate('/payment', { state: { cart } });
+  const handleCheckout = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Önce sepetteki ürünleri ürün ID'lerine göre gruplayalım
+      const groupedCartItems = cart.reduce((acc, item) => {
+        if (!acc[item.id]) {
+          acc[item.id] = {
+            product_name: item.product_name,
+            totalQuantity: 0
+          };
+        }
+        acc[item.id].totalQuantity += item.quantity;
+        return acc;
+      }, {});
+
+      // Her ürün için toplam miktar kontrolü yapalım
+      for (const productId in groupedCartItems) {
+        const response = await API.get(`/api/products?filters[id][$eq]=${productId}&populate=*`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        const currentStock = response.data.data[0].stock_quantity;
+        const totalCartQuantity = groupedCartItems[productId].totalQuantity;
+        
+        if (totalCartQuantity > currentStock) {
+          showPopup(
+            `"${groupedCartItems[productId].product_name}" için toplam miktar stoktan fazla! ` +
+            `Sepetteki: ${totalCartQuantity}, Stok: ${currentStock}`, 
+            'error'
+          );
+          return;
+        }
+      }
+
+      // Tüm kontroller başarılıysa ödeme sayfasına yönlendir
+      navigate('/payment', { state: { cart } });
+    } catch (err) {
+      console.error('Stok kontrolü sırasında hata:', err);
+      showPopup('Stok kontrolü sırasında bir hata oluştu.', 'error');
+    }
   };
 
   const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2);

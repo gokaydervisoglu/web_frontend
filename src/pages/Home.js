@@ -19,10 +19,19 @@ const Home = ({ userId, addToCart, cart }) => {
   const [categories, setCategories] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [quantities, setQuantities] = useState({});
+  const [quantities, setQuantities] = useState(() => {
+    // Sayfa yüklendiğinde localStorage'dan quantities'i al
+    const savedQuantities = localStorage.getItem('productQuantities');
+    return savedQuantities ? JSON.parse(savedQuantities) : {};
+  });
   const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
 
   const navigate = useNavigate();
+
+  // quantities değiştiğinde localStorage'a kaydet
+  useEffect(() => {
+    localStorage.setItem('productQuantities', JSON.stringify(quantities));
+  }, [quantities]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -142,10 +151,44 @@ const Home = ({ userId, addToCart, cart }) => {
     }
   };
 
-  const handleQuantityChange = (productId, quantity) => {
-    // Limit quantity between 1 and 10
-    const limitedQuantity = Math.min(Math.max(1, quantity), 10);
-    setQuantities((prev) => ({ ...prev, [productId]: limitedQuantity }));
+  const handleQuantityChange = async (productId, quantity) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await API.get(`/api/products?filters[id][$eq]=${productId}&populate=*`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      const currentStock = response.data.data[0].stock_quantity;
+      const cartItem = cart.find(item => item.id === productId);
+      const currentCartQuantity = cartItem ? cartItem.quantity : 0;
+      const remainingStock = currentStock - currentCartQuantity;
+
+      if (remainingStock <= 0) {
+        showPopup(`Bu ürün için sepetinizde maksimum adete (${currentStock}) ulaştınız.`, 'error');
+        setQuantities((prev) => {
+          const newQuantities = { ...prev, [productId]: 0 };
+          localStorage.setItem('productQuantities', JSON.stringify(newQuantities));
+          return newQuantities;
+        });
+        return;
+      }
+
+      const maxAllowedQuantity = Math.min(remainingStock, 10);
+      const newQuantity = Math.min(Math.max(1, quantity), maxAllowedQuantity);
+
+      if (quantity > maxAllowedQuantity) {
+        showPopup(`Sepetinizde ${currentCartQuantity} adet var. En fazla ${maxAllowedQuantity} adet daha ekleyebilirsiniz.`, 'info');
+      }
+
+      setQuantities((prev) => {
+        const newQuantities = { ...prev, [productId]: newQuantity };
+        localStorage.setItem('productQuantities', JSON.stringify(newQuantities));
+        return newQuantities;
+      });
+    } catch (err) {
+      console.error('Stok kontrolü sırasında hata:', err);
+      showPopup('Stok kontrolü sırasında bir hata oluştu.', 'error');
+    }
   };
 
   const showPopup = (message, type = 'success') => {
