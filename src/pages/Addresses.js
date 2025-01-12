@@ -3,10 +3,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMapMarkerAlt, faEdit, faTrash, faPlus } from '@fortawesome/free-solid-svg-icons';
 import API from '../api';
 import './Addresses.css';
+import Popup from '../components/Popup';
 
 const Addresses = ({ userId }) => {
   const [addresses, setAddresses] = useState([]);
-  const [addressIdToEdit, setAddressIdToEdit] = useState(null); // Güncellenecek adresin documentId'si
+  const [addressIdToEdit, setAddressIdToEdit] = useState(null);
   const [addressTitle, setAddressTitle] = useState('');
   const [country, setCountry] = useState('');
   const [city, setCity] = useState('');
@@ -14,6 +15,11 @@ const Addresses = ({ userId }) => {
   const [street, setStreet] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
+
+  const showNotification = (message, type = 'success') => {
+    setNotification({ show: true, message, type });
+  };
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -30,6 +36,7 @@ const Addresses = ({ userId }) => {
         setAddresses(response.data.data || []);
       } catch (err) {
         console.error('Adresler alınırken hata:', err);
+        showNotification('Adresler alınırken bir hata oluştu.', 'error');
       }
     };
 
@@ -41,8 +48,8 @@ const Addresses = ({ userId }) => {
     try {
       const token = localStorage.getItem('token');
       const endpoint = addressIdToEdit
-        ? `/api/user-addresses/${addressIdToEdit}` // Güncelleme için
-        : '/api/user-addresses'; // Yeni ekleme için
+        ? `/api/user-addresses/${addressIdToEdit}`
+        : '/api/user-addresses';
 
       const method = addressIdToEdit ? 'put' : 'post';
 
@@ -67,7 +74,10 @@ const Addresses = ({ userId }) => {
       );
 
       if (response.status === 200 || response.status === 201) {
-        alert(addressIdToEdit ? 'Adres başarıyla güncellendi!' : 'Adres başarıyla eklendi!');
+        showNotification(
+          addressIdToEdit ? 'Adres başarıyla güncellendi!' : 'Adres başarıyla eklendi!',
+          'success'
+        );
         setAddressTitle('');
         setCountry('');
         setCity('');
@@ -77,7 +87,6 @@ const Addresses = ({ userId }) => {
         setIsPopupOpen(false);
         setAddressIdToEdit(null);
 
-        // Adresleri yeniden yükle
         setAddresses((prev) =>
           addressIdToEdit
             ? prev.map((addr) =>
@@ -88,7 +97,7 @@ const Addresses = ({ userId }) => {
       }
     } catch (err) {
       console.error('Adres işlemi sırasında hata:', err);
-      alert('Adres işlemi sırasında bir hata oluştu.');
+      showNotification('Adres işlemi sırasında bir hata oluştu.', 'error');
     }
   };
 
@@ -102,17 +111,17 @@ const Addresses = ({ userId }) => {
           },
         });
 
-        alert('Adres başarıyla silindi!');
+        showNotification('Adres başarıyla silindi!', 'success');
         setAddresses((prev) => prev.filter((addr) => addr.documentId !== documentId));
       } catch (err) {
         console.error('Adres silme sırasında hata:', err);
-        alert('Adres silme sırasında bir hata oluştu.');
+        showNotification('Adres silme sırasında bir hata oluştu.', 'error');
       }
     }
   };
 
   const handleEditAddress = (address) => {
-    setAddressIdToEdit(address.documentId); // documentId'yi kullan
+    setAddressIdToEdit(address.documentId);
     setAddressTitle(address.address_title);
     setCountry(address.country);
     setCity(address.city);
@@ -243,6 +252,13 @@ const Addresses = ({ userId }) => {
           </div>
         </div>
       )}
+
+      <Popup
+        isOpen={notification.show}
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification({ ...notification, show: false })}
+      />
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCreditCard, faMapMarkerAlt, faMoneyBill } from '@fortawesome/free-solid-svg-icons';
 import API from '../api';
 import './Payment.css';
+import Popup from '../components/Popup';
 
 const Payment = ({ userId }) => {
   const { state } = useLocation();
@@ -16,6 +17,7 @@ const Payment = ({ userId }) => {
   const [selectedAddress, setSelectedAddress] = useState('');
   const [error, setError] = useState(null);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -122,13 +124,46 @@ const Payment = ({ userId }) => {
     }
   };
 
+  const updateProductStock = async (productId, quantity, token) => {
+    try {
+      // Önce ürünün mevcut stok bilgisini al
+      const productResponse = await API.get(`/api/products?filters[id][$eq]=${productId}&populate=*`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      const product = productResponse.data.data[0];
+      const currentStock = product.stock_quantity;
+      const newStock = currentStock - quantity;
+
+      // Stok miktarını güncelle
+      await API.put(
+        `/api/products/${product.documentId}`,
+        {
+          data: {
+            stock_quantity: newStock
+          }
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+    } catch (err) {
+      console.error(`Ürün stok güncellemesi sırasında hata (Ürün ID: ${productId}):`, err);
+      throw err;
+    }
+  };
+
+  const showPopup = (message, type = 'success') => {
+    setPopup({ show: true, message, type });
+  };
+
   const updateCardBalance = async () => {
     if (!selectedCard) {
-      alert('Lütfen bir kart seçin.');
+      showPopup('Lütfen bir kart seçin.', 'error');
       return;
     }
     if (!selectedAddress) {
-      alert('Lütfen bir adres seçin.');
+      showPopup('Lütfen bir adres seçin.', 'error');
       return;
     }
 
@@ -137,22 +172,21 @@ const Payment = ({ userId }) => {
       const paymentResponse = await API.get(
         `/api/payment-methods?filters[card_number][$eq]=${selectedCard.card_number}&filters[cvv][$eq]=${selectedCard.cvv}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
       const paymentMethod = paymentResponse.data.data[0];
       if (!paymentMethod) {
-        alert('Geçersiz kart bilgileri!');
+        showPopup('Geçersiz kart bilgileri!', 'error');
         return;
       }
 
       if (paymentMethod.unit_price < totalAmount) {
-        alert('Kart bakiyesi yetersiz.');
+        showPopup('Kart bakiyesi yetersiz.', 'error');
         return;
       }
 
+      // Kart bakiyesini güncelle
       const updatedBalance = paymentMethod.unit_price - totalAmount;
       await API.put(
         `/api/payment-methods/${paymentMethod.documentId}`,
@@ -168,15 +202,23 @@ const Payment = ({ userId }) => {
         }
       );
 
+      // Sipariş oluştur
       const newOrderId = await createOrder(token);
       await createOrderItems(newOrderId, token);
 
-      alert('Siparişiniz başarıyla oluşturuldu! Ana sayfaya yönlendiriliyorsunuz.');
-      navigate('/');
+      // Stok güncellemesi yap
+      for (const item of cart) {
+        await updateProductStock(item.id, item.quantity, token);
+      }
+
+      showPopup('Siparişiniz başarıyla oluşturuldu!', 'success');
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
       
     } catch (err) {
-      console.error('İşlem sırasında hata oluştu:', err.response?.data || err.message);
-      alert('İşlem sırasında bir hata oluştu!');
+      console.error('İşlem sırasında hata oluştu:', err);
+      showPopup('İşlem sırasında bir hata oluştu!', 'error');
     }
   };
 
@@ -262,6 +304,12 @@ const Payment = ({ userId }) => {
           <FontAwesomeIcon icon={faCreditCard} /> Siparişi Tamamla
         </button>
       </div>
+      <Popup
+        isOpen={popup.show}
+        message={popup.message}
+        type={popup.type}
+        onClose={() => setPopup({ ...popup, show: false })}
+      />
     </div>
   );
 };

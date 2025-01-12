@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCreditCard, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import API from '../api';
 import './PaymentMethods.css';
+import Popup from '../components/Popup';
 
 const PaymentMethods = ({ userId }) => {
   const [paymentMethods, setPaymentMethods] = useState([]);
@@ -14,7 +15,12 @@ const PaymentMethods = ({ userId }) => {
     cvv: '',
   });
   const [error, setError] = useState(null);
-  const [isPopupOpen, setIsPopupOpen] = useState(false); // Popup kontrolü
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
+
+  const showNotification = (message, type = 'success') => {
+    setNotification({ show: true, message, type });
+  };
 
   useEffect(() => {
     const fetchPaymentMethods = async () => {
@@ -31,7 +37,7 @@ const PaymentMethods = ({ userId }) => {
         setPaymentMethods(response.data.data);
       } catch (err) {
         console.error('Ödeme yöntemleri alınırken hata:', err);
-        setError('Ödeme yöntemleri alınırken bir hata oluştu.');
+        showNotification('Ödeme yöntemleri alınırken bir hata oluştu.', 'error');
       }
     };
 
@@ -58,7 +64,7 @@ const PaymentMethods = ({ userId }) => {
         }
       );
       if (response.status === 200 || response.status === 201) {
-        alert('Kart başarıyla eklendi! Başlangıç bakiyesi: 10000 TL');
+        showNotification('Kart başarıyla eklendi! Başlangıç bakiyesi: 10000 TL', 'success');
         setPaymentMethods((prev) => [...prev, response.data.data]);
         setNewCard({
           card_holder_name: '',
@@ -71,7 +77,7 @@ const PaymentMethods = ({ userId }) => {
       }
     } catch (err) {
       console.error('Kart eklenirken hata:', err.response?.data || err.message);
-      alert('Kart eklenirken bir hata oluştu.');
+      showNotification('Kart eklenirken bir hata oluştu.', 'error');
     }
   };
 
@@ -85,11 +91,11 @@ const PaymentMethods = ({ userId }) => {
           },
         });
 
-        alert('Kart başarıyla silindi!');
+        showNotification('Kart başarıyla silindi!', 'success');
         setPaymentMethods((prev) => prev.filter((method) => method.documentId !== documentId));
       } catch (err) {
         console.error('Kart silinirken hata:', err);
-        alert('Kart silinirken bir hata oluştu.');
+        showNotification('Kart silinirken bir hata oluştu.', 'error');
       }
     }
   };
@@ -199,6 +205,13 @@ const PaymentMethods = ({ userId }) => {
           </div>
         </div>
       )}
+
+      <Popup
+        isOpen={notification.show}
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification({ ...notification, show: false })}
+      />
     </div>
   );
 };

@@ -47,21 +47,18 @@
   
   .campaign-description {
     color: #666;
-    margin: 20px 0;
     line-height: 1.6;
   }
   
-  .back-button {
+  .campaign-back-button {
     background-color: #007bff;
     color: white;
     border: none;
-    padding: 8px 16px;
     border-radius: 4px;
     cursor: pointer;
-    margin-top: 20px;
   }
   
-  .back-button:hover {
+  .campaign-back-button:hover {
     background-color: #0056b3;
   }
   

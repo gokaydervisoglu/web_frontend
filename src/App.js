@@ -191,7 +191,13 @@ const App = () => {
         <Routes>
           <Route
             path="/"
-            element={isLoggedIn ? <Home userId={userId} addToCart={addToCart} /> : <HomePublic />}
+            element={
+              <Home 
+                userId={userId} 
+                addToCart={addToCart} 
+                cart={cart}
+              />
+            }
           />
           <Route
             path="/login"

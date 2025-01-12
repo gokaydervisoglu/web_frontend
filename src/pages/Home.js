@@ -11,14 +11,16 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as regularHeart } from '@fortawesome/free-regular-svg-icons';
 import { useNavigate } from 'react-router-dom';
+import Popup from '../components/Popup';
 
-const Home = ({ userId, addToCart }) => {
+const Home = ({ userId, addToCart, cart }) => {
   const [products, setProducts] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [categories, setCategories] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [quantities, setQuantities] = useState({});
+  const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
 
   const navigate = useNavigate();
 
@@ -111,7 +113,7 @@ const Home = ({ userId, addToCart }) => {
           });
 
           setFavorites((prev) => prev.filter((id) => id !== productId));
-          alert('Ürün favorilerden kaldırıldı!');
+          showPopup('Ürün favorilerden kaldırıldı!', 'info');
         }
       } else {
         const response = await API.post(
@@ -131,31 +133,56 @@ const Home = ({ userId, addToCart }) => {
 
         if (response.status === 200 || response.status === 201) {
           setFavorites((prev) => [...prev, productId]);
-          alert('Ürün favorilere eklendi!');
+          showPopup('Ürün favorilere eklendi!', 'success');
         }
       }
     } catch (err) {
       console.error('Favori işlemi sırasında hata:', err);
-      alert('Favori işlemi sırasında bir hata oluştu.');
+      showPopup('Favori işlemi sırasında bir hata oluştu.', 'error');
     }
   };
 
   const handleQuantityChange = (productId, quantity) => {
-    setQuantities((prev) => ({ ...prev, [productId]: quantity }));
+    // Limit quantity between 1 and 10
+    const limitedQuantity = Math.min(Math.max(1, quantity), 10);
+    setQuantities((prev) => ({ ...prev, [productId]: limitedQuantity }));
   };
 
-  /*DUZELTME*/
-  const handleAddToCart = (product) => {
+  const showPopup = (message, type = 'success') => {
+    setPopup({ show: true, message, type });
+  };
+
+  const handleAddToCart = async (product) => {
     if (!userId) {
-      alert("Sepete ürün eklemek için giriş yapmalısınız.");
+      showPopup("Sepete ürün eklemek için giriş yapmalısınız.", "error");
       navigate("/login");
       return;
     }
-  
-    const quantity = quantities[product.id] || 1;
-    const productWithQuantity = { ...product, quantity };
-    addToCart(productWithQuantity);
-    alert(`${quantity} adet ${product.product_name} sepete eklendi.`);
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await API.get(`/api/products?filters[id][$eq]=${product.id}&populate=*`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      const currentStock = response.data.data[0].stock_quantity;
+      const requestedQuantity = quantities[product.id] || 1;
+      const cartItem = cart.find(item => item.id === product.id);
+      const currentCartQuantity = cartItem ? cartItem.quantity : 0;
+      const totalRequestedQuantity = currentCartQuantity + requestedQuantity;
+
+      if (totalRequestedQuantity > currentStock) {
+        showPopup(`Stok yetersiz! (Mevcut: ${currentStock}, Sepette: ${currentCartQuantity})`, "error");
+        return;
+      }
+
+      const productWithQuantity = { ...product, quantity: requestedQuantity };
+      addToCart(productWithQuantity);
+      showPopup(`${requestedQuantity} adet ${product.product_name} sepete eklendi.`, "success");
+    } catch (err) {
+      console.error('Sepete ekleme sırasında hata:', err);
+      showPopup('Ürün sepete eklenirken bir hata oluştu.', "error");
+    }
   };
 
   const handleGoToDetail = (productId) => {
@@ -182,7 +209,7 @@ const Home = ({ userId, addToCart }) => {
               const { campaign_image, campaign_description, documentId } = campaign;
               const imageFormats = campaign_image?.formats || {};
               const thumbnail = imageFormats.thumbnail?.url || campaign_image?.url;
-              const imageUrl = `${process.env.REACT_APP_API_URL}${thumbnail}`;
+              const imageUrl = `http://localhost:1337${thumbnail}`;
               const description = campaign_description || 'Kampanya';
 
               return (
@@ -256,6 +283,7 @@ const Home = ({ userId, addToCart }) => {
                   <input
                     type="number"
                     min="1"
+                    max="10"
                     value={quantities[product.id] || 1}
                     onChange={(e) => handleQuantityChange(product.id, parseInt(e.target.value, 10))}
                     className="quantity-input"
@@ -276,6 +304,13 @@ const Home = ({ userId, addToCart }) => {
           <p className="loading-text">Yükleniyor...</p>
         )}
       </div>
+
+      <Popup
+        isOpen={popup.show}
+        message={popup.message}
+        type={popup.type}
+        onClose={() => setPopup({ ...popup, show: false })}
+      />
     </div>
   );
 };

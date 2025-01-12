@@ -52,7 +52,7 @@ const CampaignDetail = () => {
   // Kampanya Verisini İşle
   const { campaign_image, campaign_description } = campaign;
   const imageUrl = campaign_image?.url
-    ? `${process.env.REACT_APP_API_URL}${campaign_image.url}`
+    ? `http://localhost:1337${campaign_image.url}`
     : null;
 
   return (
@@ -68,12 +68,14 @@ const CampaignDetail = () => {
         <p className="campaign-description">
           {campaign_description || 'Açıklama mevcut değil.'}
         </p>
-
-            {/* Geri Butonu */}
-        <button onClick={() => navigate(-1)} className="back-button">
-            Geri
+        
+        {/* Geri Butonu */}
+        <button onClick={() => navigate(-1)} className="campaign-back-button">
+          Geri
         </button>
+
       </div>
+
     </div>
   );
 };
