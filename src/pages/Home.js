@@ -209,7 +209,7 @@ const Home = ({ userId, addToCart, cart }) => {
               const { campaign_image, campaign_description, documentId } = campaign;
               const imageFormats = campaign_image?.formats || {};
               const thumbnail = imageFormats.thumbnail?.url || campaign_image?.url;
-              const imageUrl = `http://localhost:1337${thumbnail}`;
+              const imageUrl = `${process.env.REACT_APP_API_URL}${thumbnail}`;
               const description = campaign_description || 'Kampanya';
 
               return (
