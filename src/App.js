@@ -81,7 +81,7 @@ const App = () => {
         <nav className="navbar">
           <div className="nav-container">
             <Link to="/" className="logo">
-              e-gokay
+              ay-market
             </Link>
 
             {/* Desktop Menu */}
