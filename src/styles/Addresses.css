@@ -1,0 +1,65 @@
+/* Adresler sayfası stil */
+
+.addresses-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.addresses-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.address-card {
+  background-color: white;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.address-title {
+  color: #333;
+  margin: 0 0 10px 0;
+  font-size: 18px;
+}
+
+.address-details p {
+  margin: 8px 0;
+  color: #666;
+}
+
+
+/* Adresler sayfası butonlar */
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.edit-button {
+  background-color: #007bff;
+  color: white;
+}
+
+.delete-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.no-address {
+  text-align: center;
+  color: #666;
+  grid-column: 1 / -1;
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .addresses-list {
+    grid-template-columns: repeat(1, 1fr);
+  }
+    
+}

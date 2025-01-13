@@ -1,7 +1,7 @@
 // Home.js
 import React, { useState, useEffect } from 'react';
 import API from '../api';
-import './Home.css';
+import '../styles/Home.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faHeart as solidHeart, 

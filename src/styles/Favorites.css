@@ -65,4 +65,13 @@
   text-align: center;
   grid-column: 1 / -1;
   color: #666;
+}
+
+.product-title {
+  transition: color 0.3s ease;
+}
+
+.product-title:hover {
+  color: #007bff;
+  text-decoration: underline;
 } 

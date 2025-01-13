@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCreditCard, faMapMarkerAlt, faMoneyBill } from '@fortawesome/free-solid-svg-icons';
 import API from '../api';
-import './Payment.css';
+import '../styles/Payment.css';
 import Popup from '../components/Popup';
 
 const Payment = ({ userId }) => {
@@ -18,6 +18,7 @@ const Payment = ({ userId }) => {
   const [error, setError] = useState(null);
   const [totalAmount, setTotalAmount] = useState(0);
   const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -62,7 +63,7 @@ const Payment = ({ userId }) => {
         const qty = parseInt(item.quantity, 10) || 1;
         return sum + price * qty;
       }, 0);
-      setTotalAmount(total);
+      setTotalAmount(Number(total.toFixed(2)));
     };
 
     if (userId) {
@@ -158,6 +159,8 @@ const Payment = ({ userId }) => {
   };
 
   const updateCardBalance = async () => {
+    if (isProcessing) return;
+    
     if (!selectedCard) {
       showPopup('Lütfen bir kart seçin.', 'error');
       return;
@@ -166,6 +169,8 @@ const Payment = ({ userId }) => {
       showPopup('Lütfen bir adres seçin.', 'error');
       return;
     }
+
+    setIsProcessing(true);
 
     try {
       const token = localStorage.getItem('token');
@@ -219,6 +224,7 @@ const Payment = ({ userId }) => {
     } catch (err) {
       console.error('İşlem sırasında hata oluştu:', err);
       showPopup('İşlem sırasında bir hata oluştu!', 'error');
+      setIsProcessing(false);
     }
   };
 
@@ -291,7 +297,10 @@ const Payment = ({ userId }) => {
           <div className="order-summary">
             <div className="amount-display">
               <span>Toplam Tutar:</span>
-              <span className="total-price">₺{totalAmount}</span>
+              <span className="total-price">₺{totalAmount.toLocaleString('tr-TR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              })}</span>
             </div>
           </div>
         </div>
@@ -299,9 +308,10 @@ const Payment = ({ userId }) => {
         <button
           className="complete-payment-btn"
           onClick={updateCardBalance}
-          disabled={!selectedCard || !selectedAddress}
+          disabled={!selectedCard || !selectedAddress || isProcessing}
         >
-          <FontAwesomeIcon icon={faCreditCard} /> Siparişi Tamamla
+          <FontAwesomeIcon icon={faCreditCard} />
+          {isProcessing ? 'İşlem Yapılıyor...' : 'Siparişi Tamamla'}
         </button>
       </div>
       <Popup

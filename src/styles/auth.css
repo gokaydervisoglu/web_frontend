@@ -60,10 +60,6 @@
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
-.input-group input::placeholder {
-  color: #adb5bd;
-}
-
 .auth-button {
   background-color: #007bff;
   color: white;
@@ -97,7 +93,6 @@
 .auth-link {
   color: #007bff;
   text-decoration: none;
-  font-weight: 600;
   margin-left: 5px;
   transition: color 0.3s ease;
 }
@@ -120,5 +115,10 @@
 
   .input-group input {
     padding: 12px 12px 12px 40px;
+  }
+
+  .input-icon{
+    left: -15px;
+    font-size: 12px;
   }
 } 

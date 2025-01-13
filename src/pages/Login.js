@@ -1,14 +1,21 @@
 // Login.js
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faLock } from '@fortawesome/free-solid-svg-icons';
 import API from '../api';
-import './auth.css';
+import '../styles/auth.css';
+import Popup from '../components/Popup';
 
 const Login = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
+  const navigate = useNavigate();
+
+  const showPopup = (message, type = 'success') => {
+    setPopup({ show: true, message, type });
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -18,10 +25,16 @@ const Login = ({ onLogin }) => {
         password,
       });
       onLogin(response.data.jwt);
-      alert('Giriş Başarılı!');
+      showPopup('Giriş başarılı! Yönlendiriliyorsunuz...', 'success');
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
     } catch (error) {
-      console.error('Login error:', error.response ? error.response.data : error.message);
-      alert('Giriş Başarısız!');
+      if (error.response?.data?.error?.message) {
+        showPopup(`Giriş başarısız: ${error.response.data.error.message}`, 'error');
+      } else {
+        showPopup('Giriş işlemi başarısız! Lütfen bilgilerinizi kontrol edin.', 'error');
+      }
     }
   };
 
@@ -56,6 +69,13 @@ const Login = ({ onLogin }) => {
           Hesabınız yok mu? <Link to="/register" className="auth-link">Kayıt Ol</Link>
         </p>
       </div>
+
+      <Popup
+        isOpen={popup.show}
+        message={popup.message}
+        type={popup.type}
+        onClose={() => setPopup({ ...popup, show: false })}
+      />
     </div>
   );
 };

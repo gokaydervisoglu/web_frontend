@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCreditCard, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import API from '../api';
-import './PaymentMethods.css';
+import '../styles/PaymentMethods.css';
 import Popup from '../components/Popup';
 
 const PaymentMethods = ({ userId }) => {
@@ -100,6 +100,63 @@ const PaymentMethods = ({ userId }) => {
     }
   };
 
+  // Kart numarası formatlaması
+  const formatCardNumber = (value) => {
+    const cleaned = value.replace(/\D/g, ''); // Sadece rakamları al
+    const limit = 16; // Maksimum 16 rakam
+    const formatted = cleaned.slice(0, limit).replace(/(\d{4})/g, '$1 ').trim();
+    return formatted;
+  };
+
+  // CVV formatlaması
+  const formatCVV = (value) => {
+    const cleaned = value.replace(/\D/g, '');
+    return cleaned.slice(0, 3); // Maksimum 3 rakam
+  };
+
+  // Ay formatlaması
+  const formatMonth = (value) => {
+    const cleaned = value.replace(/\D/g, '');
+    const month = parseInt(cleaned, 10);
+    if (month > 12) return '12';
+    if (month < 1 && cleaned.length > 0) return '01';
+    return cleaned.slice(0, 2);
+  };
+
+  // Yıl formatlaması
+  const formatYear = (value) => {
+    const cleaned = value.replace(/\D/g, '');
+    const currentYear = new Date().getFullYear() % 100; // Son 2 rakam
+    const year = parseInt(cleaned, 10);
+    if (year < currentYear && cleaned.length > 0) return currentYear.toString();
+    return cleaned.slice(0, 2);
+  };
+
+  // Input değişiklik handler'ları
+  const handleInputChange = (e, field) => {
+    const { value } = e.target;
+    let formattedValue = value;
+
+    switch (field) {
+      case 'card_number':
+        formattedValue = formatCardNumber(value);
+        break;
+      case 'cvv':
+        formattedValue = formatCVV(value);
+        break;
+      case 'expiry_month':
+        formattedValue = formatMonth(value);
+        break;
+      case 'expiry_year':
+        formattedValue = formatYear(value);
+        break;
+      default:
+        break;
+    }
+
+    setNewCard(prev => ({ ...prev, [field]: formattedValue }));
+  };
+
   return (
     <div className="payment-methods-container">
       <h1 className="section-title">
@@ -156,7 +213,8 @@ const PaymentMethods = ({ userId }) => {
                   type="text"
                   placeholder="Kart Numarası"
                   value={newCard.card_number}
-                  onChange={(e) => setNewCard({ ...newCard, card_number: e.target.value })}
+                  onChange={(e) => handleInputChange(e, 'card_number')}
+                  maxLength={19} // 16 rakam + 3 boşluk
                   required
                 />
               </div>
@@ -166,7 +224,8 @@ const PaymentMethods = ({ userId }) => {
                     type="text"
                     placeholder="Ay (MM)"
                     value={newCard.expiry_month}
-                    onChange={(e) => setNewCard({ ...newCard, expiry_month: e.target.value })}
+                    onChange={(e) => handleInputChange(e, 'expiry_month')}
+                    maxLength={2}
                     required
                   />
                 </div>
@@ -175,7 +234,8 @@ const PaymentMethods = ({ userId }) => {
                     type="text"
                     placeholder="Yıl (YY)"
                     value={newCard.expiry_year}
-                    onChange={(e) => setNewCard({ ...newCard, expiry_year: e.target.value })}
+                    onChange={(e) => handleInputChange(e, 'expiry_year')}
+                    maxLength={2}
                     required
                   />
                 </div>
@@ -184,7 +244,8 @@ const PaymentMethods = ({ userId }) => {
                     type="text"
                     placeholder="CVV"
                     value={newCard.cvv}
-                    onChange={(e) => setNewCard({ ...newCard, cvv: e.target.value })}
+                    onChange={(e) => handleInputChange(e, 'cvv')}
+                    maxLength={3}
                     required
                   />
                 </div>

@@ -3,13 +3,19 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShoppingCart, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import API from '../api';
-import './ProductDetail.css';
+import '../styles/ProductDetail.css';
+import Popup from '../components/Popup';
 
 const ProductDetail = ({ addToCart }) => {
   const { productId } = useParams();
   const [product, setProduct] = useState(null);
   const [error, setError] = useState(null);
+  const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
   const navigate = useNavigate();
+
+  const showPopup = (message, type = 'success') => {
+    setPopup({ show: true, message, type });
+  };
 
   useEffect(() => {
     const fetchProductDetail = async () => {
@@ -24,13 +30,13 @@ const ProductDetail = ({ addToCart }) => {
 
         const items = response.data.data;
         if (!items || items.length === 0) {
-          setError('Bu ID ile ürün bulunamadı.');
+          showPopup('Bu ID ile ürün bulunamadı.', 'error');
           return;
         }
         setProduct(items[0]);
       } catch (err) {
         console.error('Ürün detayı alınırken hata:', err);
-        setError('Ürün detayı getirilirken hata oluştu.');
+        showPopup('Ürün detayı getirilirken hata oluştu.', 'error');
       }
     };
 
@@ -48,6 +54,11 @@ const ProductDetail = ({ addToCart }) => {
   };
 
   const handleAddToCartDetail = () => {
+    if (product.stock_quantity <= 0) {
+      showPopup('Üzgünüz, bu ürün stokta yok!', 'error');
+      return;
+    }
+
     const item = {
       id: product.id,
       product_name: product.product_name,
@@ -55,11 +66,21 @@ const ProductDetail = ({ addToCart }) => {
       quantity: 1,
     };
     addToCart(item);
-    alert('Ürün sepete eklendi!');
+    showPopup(`${product.product_name} sepete eklendi!`, 'success');
   };
 
   if (error) {
-    return <p className="error-message">{error}</p>;
+    return (
+      <div>
+        <p className="error-message">{error}</p>
+        <Popup
+          isOpen={popup.show}
+          message={popup.message}
+          type={popup.type}
+          onClose={() => setPopup({ ...popup, show: false })}
+        />
+      </div>
+    );
   }
 
   if (!product) {
@@ -80,7 +101,10 @@ const ProductDetail = ({ addToCart }) => {
 
         <div className="product-content">
           <div className="product-info">
-            <p className="price">₺{price}</p>
+            <p className="price">₺{price.toLocaleString('tr-TR', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}</p>
             <p className="stock">Stok: {stock_quantity} adet</p>
             <p>Kategori: {categories?.category_name || 'Kategori bilgisi yok'}</p>
           </div>
@@ -99,6 +123,13 @@ const ProductDetail = ({ addToCart }) => {
           </button>
         </div>
       </div>
+
+      <Popup
+        isOpen={popup.show}
+        message={popup.message}
+        type={popup.type}
+        onClose={() => setPopup({ ...popup, show: false })}
+      />
     </div>
   );
 };

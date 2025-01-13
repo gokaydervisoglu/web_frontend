@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBox, faCreditCard } from '@fortawesome/free-solid-svg-icons';
 import API from '../api';
-import './Orders.css';
+import '../styles/Orders.css';
 
 const Orders = ({ userId }) => {
   const [orders, setOrders] = useState([]);

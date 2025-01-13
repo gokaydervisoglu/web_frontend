@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMapMarkerAlt, faEdit, faTrash, faPlus } from '@fortawesome/free-solid-svg-icons';
 import API from '../api';
-import './Addresses.css';
+import '../styles/Addresses.css';
 import Popup from '../components/Popup';
 
 const Addresses = ({ userId }) => {

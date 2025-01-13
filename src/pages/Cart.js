@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faCreditCard } from '@fortawesome/free-solid-svg-icons';
-import './Cart.css';
+import '../styles/Cart.css';
 import Popup from '../components/Popup';
 import API from '../api';
 
@@ -58,7 +58,22 @@ const Cart = ({ cart, removeFromCart }) => {
     }
   };
 
-  const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2);
+  // Sepetteki aynı ürünleri birleştir
+  const groupedCart = cart.reduce((acc, item) => {
+    const existingItem = acc.find(i => i.id === item.id);
+    
+    if (existingItem) {
+      existingItem.quantity += item.quantity;
+      existingItem.totalPrice = existingItem.quantity * existingItem.price;
+    } else {
+      acc.push({
+        ...item,
+        totalPrice: item.quantity * item.price
+      });
+    }
+    
+    return acc;
+  }, []);
 
   const handleRemoveFromCart = (itemId) => {
     removeFromCart(itemId);
@@ -70,17 +85,17 @@ const Cart = ({ cart, removeFromCart }) => {
       <h1 className="section-title">Sepetim</h1>
       
       <div className="cart-content">
-        {cart.length > 0 ? (
+        {groupedCart.length > 0 ? (
           <>
             <div className="cart-items">
-              {cart.map((item) => (
+              {groupedCart.map((item) => (
                 <div key={item.id} className="cart-item">
                   <div className="item-details">
                     <h2>{item.product_name}</h2>
                     <div className="item-info">
-                      <p className="price">Fiyat: ₺{item.price}</p>
-                      <p className="quantity">Adet: {item.quantity}</p>
-                      <p className="total">Toplam: ₺{(item.price * item.quantity).toFixed(2)}</p>
+                      <p className="price">Birim Fiyat: ₺{item.price}</p>
+                      <p className="quantity">Toplam Adet: {item.quantity}</p>
+                      <p className="total">Toplam: ₺{item.totalPrice.toFixed(2)}</p>
                     </div>
                   </div>
                   <button 
@@ -96,7 +111,7 @@ const Cart = ({ cart, removeFromCart }) => {
             <div className="cart-summary">
               <div className="total-amount">
                 <h3>Toplam Tutar:</h3>
-                <p>₺{totalAmount}</p>
+                <p>₺{groupedCart.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2)}</p>
               </div>
               <button 
                 className="checkout-button"

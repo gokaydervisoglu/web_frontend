@@ -1,7 +1,7 @@
 // HomePublic.js
 import React, { useState, useEffect } from 'react';
 import API from '../api';
-import './Home.css';
+import '../styles/Home.css';
 import { useNavigate } from 'react-router-dom';
 
 const HomePublic = () => {

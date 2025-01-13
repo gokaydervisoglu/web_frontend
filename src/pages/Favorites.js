@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import API from '../api';
-import './Favorites.css';
+import '../styles/Favorites.css';
+import Popup from '../components/Popup';
 
 const Favorites = ({ userId }) => {
   const [favorites, setFavorites] = useState([]);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
+
+  const showPopup = (message, type = 'success') => {
+    setPopup({ show: true, message, type });
+  };
 
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -18,7 +26,7 @@ const Favorites = ({ userId }) => {
         setFavorites(response.data.data);
       } catch (err) {
         console.error('Favoriler alınırken hata:', err);
-        setError('Favoriler yüklenirken bir hata oluştu.');
+        showPopup('Favoriler yüklenirken bir hata oluştu.', 'error');
       }
     };
 
@@ -50,12 +58,16 @@ const Favorites = ({ userId }) => {
           prevFavorites.filter(favorite => favorite.product.id !== productId)
         );
         
-        alert('Ürün favorilerden kaldırıldı!');
+        showPopup('Ürün favorilerden kaldırıldı!', 'success');
       }
     } catch (err) {
       console.error('Favori silme işlemi sırasında hata:', err);
-      setError('Favori silme işlemi sırasında bir hata oluştu.');
+      showPopup('Favori silme işlemi sırasında bir hata oluştu.', 'error');
     }
+  };
+
+  const handleGoToDetail = (productId) => {
+    navigate(`/product/${productId}`);
   };
 
   return (
@@ -68,7 +80,13 @@ const Favorites = ({ userId }) => {
         {favorites.length > 0 ? (
           favorites.map((favorite) => (
             <div key={favorite.id} className="favorite-card">
-              <h2>{favorite.product?.product_name || 'Ürün bilgisi eksik'}</h2>
+              <h2 
+                onClick={() => handleGoToDetail(favorite.product?.id)}
+                style={{ cursor: 'pointer' }}
+                className="product-title"
+              >
+                {favorite.product?.product_name || 'Ürün bilgisi eksik'}
+              </h2>
               <div className="favorite-info">
                 <p className="price">
                   Fiyat: {favorite.product?.price ? `₺${favorite.product.price}` : 'Bilgi yok'}
@@ -89,6 +107,13 @@ const Favorites = ({ userId }) => {
           <p className="no-favorites">Favori ürününüz bulunmamaktadır.</p>
         )}
       </div>
+
+      <Popup
+        isOpen={popup.show}
+        message={popup.message}
+        type={popup.type}
+        onClose={() => setPopup({ ...popup, show: false })}
+      />
     </div>
   );
 };
