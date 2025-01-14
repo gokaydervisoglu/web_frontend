@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import API from '../api';
 import '../styles/Home.css';
 import { useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faImage, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 
 const HomePublic = () => {
   const [products, setProducts] = useState([]);
@@ -15,8 +17,8 @@ const HomePublic = () => {
     const getProducts = async () => {
       try {
         const endpoint = selectedCategory
-          ? `/api/products?filters[categories][id][$eq]=${selectedCategory}`
-          : '/api/products';
+          ? `/api/products?filters[categories][id][$eq]=${selectedCategory}&populate=*`
+          : '/api/products?populate=*';
         const response = await API.get(endpoint);
         setProducts(response.data.data);
       } catch (err) {
@@ -70,19 +72,39 @@ const HomePublic = () => {
       </div>
 
       <div className="container">
-        <div className="row">
+        <div className="products-grid">
           {products.length > 0 ? (
             products.map((product) => (
               <div className="home-product" key={product.id}>
-                <h2>{product.product_name}</h2>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <p>Fiyat: ₺{product.price}</p>
+                <div className="product-image">
+                  {product.image_url?.[0] ? (
+                    <img 
+                      src={`${process.env.REACT_APP_API_URL}${product.image_url[0].formats?.thumbnail?.url || product.image_url[0].url}`}
+                      alt={product.product_name}
+                      className="product-thumbnail"
+                    />
+                  ) : (
+                    <div className="product-image-placeholder">
+                      <FontAwesomeIcon icon={faImage} size="2x" />
+                    </div>
+                  )}
                 </div>
-                <button onClick={addToCart}>Sepete Ekle</button>
+
+                <h2>{product.product_name}</h2>
+                <div className="price-quantity-container">
+                  <p className="price-tag">₺{product.price}</p>
+                </div>
+                <button 
+                  className="add-to-cart-btn"
+                  onClick={addToCart}
+                >
+                  <FontAwesomeIcon icon={faShoppingCart} />
+                  Sepete Ekle
+                </button>
               </div>
             ))
           ) : (
-            <p>Yükleniyor...</p>
+            <p className="loading-text">Yükleniyor...</p>
           )}
         </div>
       </div>

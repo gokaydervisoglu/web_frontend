@@ -7,7 +7,8 @@ import {
   faHeart as solidHeart, 
   faShoppingCart, 
   faTags, 
-  faListAlt 
+  faListAlt,
+  faImage 
 } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as regularHeart } from '@fortawesome/free-regular-svg-icons';
 import { useNavigate } from 'react-router-dom';
@@ -81,8 +82,8 @@ const Home = ({ userId, addToCart, cart }) => {
       try {
         const token = localStorage.getItem('token');
         const endpoint = selectedCategory
-          ? `/api/products?filters[categories][id][$eq]=${selectedCategory}`
-          : '/api/products';
+          ? `/api/products?filters[categories][id][$eq]=${selectedCategory}&populate=*`
+          : '/api/products?populate=*';
         const response = await API.get(endpoint, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -315,6 +316,20 @@ const Home = ({ userId, addToCart, cart }) => {
                   size="lg"
                 />
               </button>
+
+              <div className="product-image" onClick={() => goToDetail(product.id)}>
+                {product.image_url?.[0] ? (
+                  <img 
+                    src={`${process.env.REACT_APP_API_URL}${product.image_url[0].formats?.thumbnail?.url || product.image_url[0].url}`}
+                    alt={product.product_name}
+                    className="product-thumbnail"
+                  />
+                ) : (
+                  <div className="product-image-placeholder">
+                    <FontAwesomeIcon icon={faImage} size="2x" />
+                  </div>
+                )}
+              </div>
 
               <h2 onClick={() => goToDetail(product.id)}>
                 {product.product_name}

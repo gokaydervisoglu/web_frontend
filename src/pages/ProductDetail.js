@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShoppingCart, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faShoppingCart, faArrowLeft, faImage } from '@fortawesome/free-solid-svg-icons';
 import API from '../api';
 import '../styles/ProductDetail.css';
 import Popup from '../components/Popup';
@@ -97,6 +97,21 @@ const ProductDetail = ({ addToCart }) => {
           <button className="back-button" onClick={() => navigate(-1)}>
             <FontAwesomeIcon icon={faArrowLeft} /> Geri
           </button>
+        </div>
+
+        <div className="product-detail-image">
+          {product.image_url?.[0] ? (
+            <img 
+              src={`${process.env.REACT_APP_API_URL}${product.image_url[0].url}`}
+              alt={product_name}
+              className="detail-image"
+              loading="lazy"
+            />
+          ) : (
+            <div className="detail-image-placeholder">
+              <FontAwesomeIcon icon={faImage} size="3x" />
+            </div>
+          )}
         </div>
 
         <div className="product-content">
