@@ -75,11 +75,6 @@ const App = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const clearCart = () => {
-    setCart([]);
-    localStorage.removeItem('cart');
-  };
-
   return (
     <Router>
       <div>
@@ -220,16 +215,7 @@ const App = () => {
             <>
               <Route path="/favorites" element={<Favorites userId={userId} />} />
               <Route path="/cart" element={<Cart cart={cart} removeFromCart={removeFromCart} />} />
-              <Route 
-                path="/payment" 
-                element={
-                  <Payment 
-                    userId={userId} 
-                    cart={cart} 
-                    clearCart={clearCart}
-                  />
-                } 
-              />
+              <Route path="/payment" element={<Payment userId={userId} cart={cart} />} />
               <Route path="/orders" element={<Orders userId={userId} />} />
               <Route path="/addresses" element={<Addresses userId={userId} />} />
               <Route path="/payment-methods" element={<PaymentMethods userId={userId} />} />
