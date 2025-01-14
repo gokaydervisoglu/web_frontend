@@ -7,13 +7,32 @@ import '../styles/Orders.css';
 
 const Orders = ({ userId }) => {
   const [orders, setOrders] = useState([]);
+  const [orderItems, setOrderItems] = useState({});
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchUserOrders = async () => {
+    const fetchOrderItems = async (orderId) => {
       try {
         const token = localStorage.getItem('token');
         const response = await API.get(
+          `/api/order-items?filters[order][id][$eq]=${orderId}&populate=*`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        return response.data.data;
+      } catch (err) {
+        console.error(`Sipariş detayları alınamadı (Order ID: ${orderId}):`, err);
+        return [];
+      }
+    };
+
+    const fetchUserOrders = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const ordersResponse = await API.get(
           `/api/orders?filters[users_permissions_user][id][$eq]=${userId}&populate=*`,
           {
             headers: {
@@ -21,7 +40,17 @@ const Orders = ({ userId }) => {
             },
           }
         );
-        setOrders(response.data.data);
+
+        const orders = ordersResponse.data.data;
+        setOrders(orders);
+
+        // Her sipariş için order items'ları al
+        const itemsMap = {};
+        for (const order of orders) {
+          const items = await fetchOrderItems(order.id);
+          itemsMap[order.id] = items;
+        }
+        setOrderItems(itemsMap);
       } catch (err) {
         console.error('Siparişler alınırken hata:', err);
         setError('Siparişler yüklenirken bir hata oluştu.');
@@ -43,39 +72,34 @@ const Orders = ({ userId }) => {
       <div className="orders-grid">
         {orders.length > 0 ? (
           orders.map((order) => {
-            const {
-              id,
-              order_status,
-              total_amount,
-              createdAt,
-              user_address,
-              order_items,
-            } = order;
+            const items = orderItems[order.id] || [];
 
             return (
-              <div key={id} className="order-card">
+              <div key={order.id} className="order-card">
                 <div className="order-header">
-                  <span>Sipariş #{id}</span>
-                  <span className="order-status">{order_status}</span>
+                  <span>Sipariş #{order.id}</span>
+                  <span className="order-status">{order.order_status}</span>
                 </div>
 
                 <div className="order-content">
-                  <p>Tarih: {new Date(createdAt).toLocaleString()}</p>
-                  <p>Adres: {user_address?.address_title || 'Adres bilgisi yok'}</p>
+                  <p>Tarih: {new Date(order.createdAt).toLocaleString()}</p>
+                  <p>Adres: {order.user_address?.address_title || 'Adres bilgisi yok'}</p>
                   
                   <div className="order-items">
                     <h4>Sipariş Detayı:</h4>
-                    {order_items && order_items.map((item, index) => (
+                    {items.map((item, index) => (
                       <div key={index} className="order-item">
-                        <span className="item-name">{item.product_name}</span>
+                        <span className="item-name">
+                          {item.products[0]?.product_name || 'Ürün adı bulunamadı'}
+                        </span>
                         <span className="item-quantity">x{item.quantity}</span>
-                        <span className="item-price">₺{item.price}</span>
+                        <span className="item-price">₺{item.unit_price}</span>
                       </div>
                     ))}
                   </div>
 
                   <p className="order-total">
-                    <FontAwesomeIcon icon={faCreditCard} /> Toplam: ₺{total_amount}
+                    <FontAwesomeIcon icon={faCreditCard} /> Toplam: ₺{order.total_amount}
                   </p>
                 </div>
               </div>
