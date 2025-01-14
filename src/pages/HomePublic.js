@@ -8,12 +8,11 @@ const HomePublic = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [quantities, setQuantities] = useState({});
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const getProducts = async () => {
       try {
         const endpoint = selectedCategory
           ? `/api/products?filters[categories][id][$eq]=${selectedCategory}`
@@ -25,11 +24,11 @@ const HomePublic = () => {
       }
     };
 
-    fetchProducts();
+    getProducts();
   }, [selectedCategory]);
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const getCategories = async () => {
       try {
         const response = await API.get('/api/categories');
         setCategories(response.data.data);
@@ -38,21 +37,16 @@ const HomePublic = () => {
       }
     };
 
-    fetchCategories();
+    getCategories();
   }, []);
 
-  const handleQuantityChange = (productId, quantity) => {
-    setQuantities((prev) => ({ ...prev, [productId]: quantity }));
-  };
-
-  const handleAddToCart = () => {
+  const addToCart = () => {
     alert('Sepete ürün eklemek için giriş yapmalısınız.');
     navigate('/login');
   };
 
   return (
     <div>
-      {/* Kategoriler */}
       <div className="category-button">
         <div className="container">
           <div className="category-row">
@@ -75,19 +69,16 @@ const HomePublic = () => {
         </div>
       </div>
 
-      {/* Ürünler */}
       <div className="container">
         <div className="row">
           {products.length > 0 ? (
             products.map((product) => (
               <div className="home-product" key={product.id}>
                 <h2>{product.product_name}</h2>
-
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <p>Fiyat: ₺{product.price}</p>
                 </div>
-
-                <button onClick={handleAddToCart}>Sepete Ekle</button>
+                <button onClick={addToCart}>Sepete Ekle</button>
               </div>
             ))
           ) : (

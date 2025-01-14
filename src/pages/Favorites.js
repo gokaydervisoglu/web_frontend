@@ -15,7 +15,7 @@ const Favorites = ({ userId }) => {
   };
 
   useEffect(() => {
-    const fetchFavorites = async () => {
+    const getFavorites = async () => {
       try {
         const token = localStorage.getItem('token');
         const response = await API.get(`/api/favorites?populate=*&filters[user][id][$eq]=${userId}`, {
@@ -30,10 +30,10 @@ const Favorites = ({ userId }) => {
       }
     };
 
-    fetchFavorites();
+    getFavorites();
   }, [userId]);
 
-  const handleRemoveFavorite = async (productId) => {
+  const removeFavorite = async (productId) => {
     try {
       const token = localStorage.getItem('token');
       
@@ -66,7 +66,7 @@ const Favorites = ({ userId }) => {
     }
   };
 
-  const handleGoToDetail = (productId) => {
+  const goToDetail = (productId) => {
     navigate(`/product/${productId}`);
   };
 
@@ -81,7 +81,7 @@ const Favorites = ({ userId }) => {
           favorites.map((favorite) => (
             <div key={favorite.id} className="favorite-card">
               <h2 
-                onClick={() => handleGoToDetail(favorite.product?.id)}
+                onClick={() => goToDetail(favorite.product?.id)}
                 style={{ cursor: 'pointer' }}
                 className="product-title"
               >
@@ -96,7 +96,7 @@ const Favorites = ({ userId }) => {
                 </p>
               </div>
               <button 
-                onClick={() => handleRemoveFavorite(favorite.product?.id)}
+                onClick={() => removeFavorite(favorite.product?.id)}
                 className="fav-remove-button"
               >
                 Favorilerden Kaldır

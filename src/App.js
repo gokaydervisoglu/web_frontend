@@ -29,11 +29,11 @@ const App = () => {
     const token = localStorage.getItem('token');
     if (token) {
       setIsLoggedIn(true);
-      fetchUserId();
+      getUserId();
     }
   }, []);
 
-  const fetchUserId = async () => {
+  const getUserId = async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await API.get('/api/users/me', {
@@ -48,13 +48,13 @@ const App = () => {
     }
   };
 
-  const handleLogin = (token) => {
+  const doLogin = (token) => {
     localStorage.setItem('token', token);
     setIsLoggedIn(true);
-    fetchUserId();
+    getUserId();
   };
 
-  const handleLogout = () => {
+  const logout = () => {
     if (window.confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
       localStorage.removeItem('token');
       setIsLoggedIn(false);
@@ -123,7 +123,7 @@ const App = () => {
                     <FontAwesomeIcon icon={faUser} /> {username}
                   </li>
                   <li className='logout-li'>
-                    <button className="logout-button" onClick={handleLogout}>
+                    <button className="logout-button" onClick={logout}>
                       Çıkış
                     </button>
                   </li>
@@ -176,7 +176,7 @@ const App = () => {
                       <FontAwesomeIcon icon={faUser} /> {username}
                     </li>
                     <li className='logout-li'>
-                      <button className="logout-button" onClick={handleLogout}>
+                      <button className="logout-button" onClick={logout}>
                         Çıkış
                       </button>
                     </li>
@@ -205,7 +205,7 @@ const App = () => {
           />
           <Route
             path="/login"
-            element={isLoggedIn ? <Navigate to="/" /> : <Login onLogin={handleLogin} />}
+            element={isLoggedIn ? <Navigate to="/" /> : <Login onLogin={doLogin} />}
           />
           <Route
             path="/register"

@@ -18,7 +18,7 @@ const ProductDetail = ({ addToCart }) => {
   };
 
   useEffect(() => {
-    const fetchProductDetail = async () => {
+    const getSavedCards = async () => {
       try {
         const token = localStorage.getItem('token');
         const response = await API.get(
@@ -40,10 +40,10 @@ const ProductDetail = ({ addToCart }) => {
       }
     };
 
-    if (productId) fetchProductDetail();
+    if (productId) getSavedCards();
   }, [productId]);
 
-  const renderDescription = (description) => {
+  const doDescription = (description) => {
     if (!description) return 'Açıklama yok';
     if (Array.isArray(description)) {
       return description.map((item, index) => (
@@ -110,7 +110,7 @@ const ProductDetail = ({ addToCart }) => {
           </div>
 
           <div className="product-description">
-            {renderDescription(product_desc)}
+            {doDescription(product_desc)}
           </div>
 
           <button 

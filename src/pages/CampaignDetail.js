@@ -10,11 +10,10 @@ const CampaignDetail = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchCampaignDetail = async () => {
+    const getCampaign = async () => {
       try {
         const token = localStorage.getItem('token');
 
-        // API İsteği
         const response = await API.get(
           `/api/campaigns?filters[documentId][$eq]=${campaignId}&populate=*`,
           {
@@ -22,7 +21,6 @@ const CampaignDetail = () => {
           }
         );
 
-        // Yanıt Verisini İncele
         console.log('API Response:', response.data);
 
         const campaignData = response?.data?.data?.[0];
@@ -38,7 +36,7 @@ const CampaignDetail = () => {
       }
     };
 
-    if (campaignId) fetchCampaignDetail();
+    if (campaignId) getCampaign();
   }, [campaignId]);
 
   if (error) {

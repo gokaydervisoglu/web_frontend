@@ -21,7 +21,7 @@ const Payment = ({ userId }) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    const fetchAddresses = async () => {
+    const getAddresses = async () => {
       try {
         const token = localStorage.getItem('token');
         const response = await API.get(
@@ -39,7 +39,7 @@ const Payment = ({ userId }) => {
       }
     };
 
-    const fetchSavedCards = async () => {
+    const savedCards = async () => {
       try {
         const token = localStorage.getItem('token');
         const response = await API.get(
@@ -67,8 +67,8 @@ const Payment = ({ userId }) => {
     };
 
     if (userId) {
-      fetchAddresses();
-      fetchSavedCards();
+      getAddresses();
+      savedCards();
       calculateTotalAmount();
     }
   }, [userId, cart]);

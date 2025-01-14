@@ -2,10 +2,13 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 
+const API_TOKEN = process.env.REACT_APP_API_TOKEN;
+const API_URL = process.env.REACT_APP_API_URL;
+
 // Strapi URL ve API Token
-const STRAPI_URL = 'http://127.0.0.1:1337/api/products';
-const CATEGORIES_URL = 'http://127.0.0.1:1337/api/categories';
-const API_TOKEN = '3c8c7788bb088775c8dd38a8d7d8636db1f6e07e1cb653a0b7b6e1f44b5628584b5e333c0c48d2ee2380ada25805e3ba2581c41e93310360d33614fc64ee35836dcd517057f7f88450e4ec15a8f3c832e1818a977df088952daef5f5d3c0f56b264940107979c34e282d707530238035f3fc21327f35ffad3c3a087c531b5184';
+const STRAPI_URL = `${API_URL}/api/products`;
+const CATEGORIES_URL = `${API_URL}/api/categories`;
+
 
 // JSON dosyasını oku
 const productsFilePath = path.join(__dirname, 'products.json');
@@ -60,7 +63,6 @@ const syncProducts = async () => {
       };
 
       // 3) Bu ürün sistemde var mı? => product_name üzerinden arama
-      //    http://localhost:1337/api/products?filters[product_name][$eq]=Kırkağaç Kavun&populate=categories
       const searchUrl = `${STRAPI_URL}?filters[product_name][$eq]=${encodeURIComponent(product.product_name)}&populate=categories`;
       console.log(`Strapi'ye GET isteği yapılıyor: ${searchUrl}`);
       const existingProductRes = await axios.get(searchUrl, { headers });

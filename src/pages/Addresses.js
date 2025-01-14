@@ -22,7 +22,7 @@ const Addresses = ({ userId }) => {
   };
 
   useEffect(() => {
-    const fetchAddresses = async () => {
+    const getAddresses = async () => {
       try {
         const token = localStorage.getItem('token');
         const response = await API.get(
@@ -40,10 +40,10 @@ const Addresses = ({ userId }) => {
       }
     };
 
-    fetchAddresses();
+    getAddresses();
   }, [userId]);
 
-  const handleAddressSubmit = async (e) => {
+  const addressSubmit = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
@@ -101,7 +101,7 @@ const Addresses = ({ userId }) => {
     }
   };
 
-  const handleDeleteAddress = async (documentId) => {
+  const deleteAddress = async (documentId) => {
     if (window.confirm('Bu adresi silmek istediğinizden emin misiniz?')) {
       try {
         const token = localStorage.getItem('token');
@@ -120,7 +120,7 @@ const Addresses = ({ userId }) => {
     }
   };
 
-  const handleEditAddress = (address) => {
+  const editAddress = (address) => {
     setAddressIdToEdit(address.documentId);
     setAddressTitle(address.address_title);
     setCountry(address.country);
@@ -159,13 +159,13 @@ const Addresses = ({ userId }) => {
               <div className="button-group">
                 <button 
                   className="edit-button"
-                  onClick={() => handleEditAddress(addr)}
+                  onClick={() => editAddress(addr)}
                 >
                   <FontAwesomeIcon icon={faEdit} /> Düzenle
                 </button>
                 <button
                   className="delete-button"
-                  onClick={() => handleDeleteAddress(addr.documentId)}
+                  onClick={() => deleteAddress(addr.documentId)}
                 >
                   <FontAwesomeIcon icon={faTrash} /> Sil
                 </button>
@@ -181,7 +181,7 @@ const Addresses = ({ userId }) => {
         <div className="popup">
           <div className="popup-content">
             <h2>{addressIdToEdit ? 'Adresi Düzenle' : 'Yeni Adres Ekle'}</h2>
-            <form onSubmit={handleAddressSubmit}>
+            <form onSubmit={addressSubmit}>
               <div className="form-group">
                 <input
                   type="text"

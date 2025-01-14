@@ -11,6 +11,7 @@ const Register = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
   const navigate = useNavigate();
 
@@ -18,15 +19,19 @@ const Register = () => {
     setPopup({ show: true, message, type });
   };
 
-  const handleRegister = async (e) => {
+  const doRegister = async (e) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      showPopup('Şifreler eşleşmiyor!', 'error');
+      return;
+    }
+
     try {
-      const response = await API.post('api/auth/local/register', {
+      await API.post('/api/auth/local/register', {
         username,
         email,
         password,
       });
-      console.log('User registered:', response.data);
       showPopup('Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz...', 'success');
       setTimeout(() => {
         navigate('/login');
@@ -45,7 +50,7 @@ const Register = () => {
     <div className="auth-container">
       <div className="auth-card">
         <h2 className="auth-title">Kayıt Ol</h2>
-        <form className="auth-form" onSubmit={handleRegister}>
+        <form className="auth-form" onSubmit={doRegister}>
           <div className="input-group">
             <FontAwesomeIcon icon={faUser} className="input-icon" />
             <input
@@ -73,6 +78,16 @@ const Register = () => {
               placeholder="Şifre"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="input-group">
+            <FontAwesomeIcon icon={faLock} className="input-icon" />
+            <input
+              type="password"
+              placeholder="Şifreyi Tekrar Girin"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
           </div>

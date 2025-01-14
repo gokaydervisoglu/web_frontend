@@ -11,7 +11,7 @@ const Orders = ({ userId }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchOrderItems = async (orderId) => {
+    const getOrderItems = async (orderId) => {
       try {
         const token = localStorage.getItem('token');
         const response = await API.get(
@@ -29,7 +29,7 @@ const Orders = ({ userId }) => {
       }
     };
 
-    const fetchUserOrders = async () => {
+    const getUserOrders = async () => {
       try {
         const token = localStorage.getItem('token');
         const ordersResponse = await API.get(
@@ -44,10 +44,9 @@ const Orders = ({ userId }) => {
         const orders = ordersResponse.data.data;
         setOrders(orders);
 
-        // Her sipariş için order items'ları al
         const itemsMap = {};
         for (const order of orders) {
-          const items = await fetchOrderItems(order.id);
+          const items = await getOrderItems(order.id);
           itemsMap[order.id] = items;
         }
         setOrderItems(itemsMap);
@@ -58,7 +57,7 @@ const Orders = ({ userId }) => {
     };
 
     if (userId) {
-      fetchUserOrders();
+      getUserOrders();
     }
   }, [userId]);
 

@@ -97,7 +97,7 @@ const Home = ({ userId, addToCart, cart }) => {
     fetchProducts();
   }, [selectedCategory]);
 
-  const handleToggleFavorite = async (productId) => {
+  const toggleFavorite = async (productId) => {
     const isFavorite = favorites.includes(productId);
 
     try {
@@ -151,7 +151,7 @@ const Home = ({ userId, addToCart, cart }) => {
     }
   };
 
-  const handleQuantityChange = async (productId, quantity) => {
+  const updateQuantity = async (productId, quantity) => {
     try {
       const token = localStorage.getItem('token');
       const response = await API.get(`/api/products?filters[id][$eq]=${productId}&populate=*`, {
@@ -195,7 +195,7 @@ const Home = ({ userId, addToCart, cart }) => {
     setPopup({ show: true, message, type });
   };
 
-  const handleAddToCart = async (product) => {
+  const addToCartItem = async (product) => {
     if (!userId) {
       showPopup("Sepete ürün eklemek için giriş yapmalısınız.", "error");
       navigate("/login");
@@ -228,12 +228,12 @@ const Home = ({ userId, addToCart, cart }) => {
     }
   };
 
-  const handleGoToDetail = (productId) => {
+  const goToDetail = (productId) => {
     navigate(`/product/${productId}`);
   };
 
   // Kampanya Detayına Git
-  const handleGoToCampaignDetail = (campaignDocumentId) => {
+  const goToCampaignDetail = (campaignDocumentId) => {
     navigate(`/campaign/${campaignDocumentId}`);
   };
   
@@ -259,7 +259,7 @@ const Home = ({ userId, addToCart, cart }) => {
                 <div
                   key={documentId}
                   className="campaign-item-home"
-                  onClick={() => handleGoToCampaignDetail(documentId)}
+                  onClick={() => goToCampaignDetail(documentId)}
 
                 >
                   <img src={imageUrl} alt={description} className="campaign-image-home" />
@@ -307,7 +307,7 @@ const Home = ({ userId, addToCart, cart }) => {
             <div className="home-product" key={product.id}>
               <button
                 className="favorite-btn"
-                onClick={() => handleToggleFavorite(product.id)}
+                onClick={() => toggleFavorite(product.id)}
               >
                 <FontAwesomeIcon
                   icon={favorites.includes(product.id) ? solidHeart : regularHeart}
@@ -316,7 +316,7 @@ const Home = ({ userId, addToCart, cart }) => {
                 />
               </button>
 
-              <h2 onClick={() => handleGoToDetail(product.id)}>
+              <h2 onClick={() => goToDetail(product.id)}>
                 {product.product_name}
               </h2>
 
@@ -328,7 +328,7 @@ const Home = ({ userId, addToCart, cart }) => {
                     min="1"
                     max="10"
                     value={quantities[product.id] || 1}
-                    onChange={(e) => handleQuantityChange(product.id, parseInt(e.target.value, 10))}
+                    onChange={(e) => updateQuantity(product.id, parseInt(e.target.value, 10))}
                     className="quantity-input"
                   />
                 </div>
@@ -336,7 +336,7 @@ const Home = ({ userId, addToCart, cart }) => {
 
               <button 
                 className="add-to-cart-btn"
-                onClick={() => handleAddToCart(product)}
+                onClick={() => addToCartItem(product)}
               >
                 <FontAwesomeIcon icon={faShoppingCart} />
                 Sepete Ekle

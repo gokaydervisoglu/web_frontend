@@ -23,7 +23,7 @@ const PaymentMethods = ({ userId }) => {
   };
 
   useEffect(() => {
-    const fetchPaymentMethods = async () => {
+    const getPaymentMethods = async () => {
       try {
         const token = localStorage.getItem('token');
         const response = await API.get(
@@ -41,10 +41,10 @@ const PaymentMethods = ({ userId }) => {
       }
     };
 
-    if (userId) fetchPaymentMethods();
+    if (userId) getPaymentMethods();
   }, [userId]);
 
-  const handleAddPaymentMethod = async (e) => {
+  const addPaymentMethod = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
@@ -81,7 +81,7 @@ const PaymentMethods = ({ userId }) => {
     }
   };
 
-  const handleDeletePaymentMethod = async (documentId) => {
+  const deletePaymentMethod = async (documentId) => {
     if (window.confirm('Bu ödeme yöntemini silmek istediğinizden emin misiniz?')) {
       try {
         const token = localStorage.getItem('token');
@@ -133,7 +133,7 @@ const PaymentMethods = ({ userId }) => {
   };
 
   // Input değişiklik handler'ları
-  const handleInputChange = (e, field) => {
+  const updateInput = (e, field) => {
     const { value } = e.target;
     let formattedValue = value;
 
@@ -183,7 +183,7 @@ const PaymentMethods = ({ userId }) => {
               </div>
               <button
                 className="pay-delete-button"
-                onClick={() => handleDeletePaymentMethod(method.documentId)}
+                onClick={() => deletePaymentMethod(method.documentId)}
               >
                 <FontAwesomeIcon icon={faTrash} /> Sil
               </button>
@@ -198,7 +198,7 @@ const PaymentMethods = ({ userId }) => {
         <div className="popup">
           <div className="popup-content">
             <h2>Yeni Kart Ekle</h2>
-            <form onSubmit={handleAddPaymentMethod}>
+            <form onSubmit={addPaymentMethod}>
               <div className="form-group">
                 <input
                   type="text"
@@ -213,7 +213,7 @@ const PaymentMethods = ({ userId }) => {
                   type="text"
                   placeholder="Kart Numarası"
                   value={newCard.card_number}
-                  onChange={(e) => handleInputChange(e, 'card_number')}
+                  onChange={(e) => updateInput(e, 'card_number')}
                   maxLength={19} // 16 rakam + 3 boşluk
                   required
                 />
@@ -224,7 +224,7 @@ const PaymentMethods = ({ userId }) => {
                     type="text"
                     placeholder="Ay (MM)"
                     value={newCard.expiry_month}
-                    onChange={(e) => handleInputChange(e, 'expiry_month')}
+                    onChange={(e) => updateInput(e, 'expiry_month')}
                     maxLength={2}
                     required
                   />
@@ -234,7 +234,7 @@ const PaymentMethods = ({ userId }) => {
                     type="text"
                     placeholder="Yıl (YY)"
                     value={newCard.expiry_year}
-                    onChange={(e) => handleInputChange(e, 'expiry_year')}
+                    onChange={(e) => updateInput(e, 'expiry_year')}
                     maxLength={2}
                     required
                   />
@@ -244,7 +244,7 @@ const PaymentMethods = ({ userId }) => {
                     type="text"
                     placeholder="CVV"
                     value={newCard.cvv}
-                    onChange={(e) => handleInputChange(e, 'cvv')}
+                    onChange={(e) => updateInput(e, 'cvv')}
                     maxLength={3}
                     required
                   />

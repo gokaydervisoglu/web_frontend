@@ -15,11 +15,10 @@ const Cart = ({ cart, removeFromCart }) => {
     setPopup({ show: true, message, type });
   };
 
-  const handleCheckout = async () => {
+  const doCheckout = async () => {
     try {
       const token = localStorage.getItem('token');
       
-      // Önce sepetteki ürünleri ürün ID'lerine göre gruplayalım
       const groupedCartItems = cart.reduce((acc, item) => {
         if (!acc[item.id]) {
           acc[item.id] = {
@@ -31,7 +30,6 @@ const Cart = ({ cart, removeFromCart }) => {
         return acc;
       }, {});
 
-      // Her ürün için toplam miktar kontrolü yapalım
       for (const productId in groupedCartItems) {
         const response = await API.get(`/api/products?filters[id][$eq]=${productId}&populate=*`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -50,7 +48,6 @@ const Cart = ({ cart, removeFromCart }) => {
         }
       }
 
-      // Tüm kontroller başarılıysa ödeme sayfasına yönlendir
       navigate('/payment', { state: { cart } });
     } catch (err) {
       console.error('Stok kontrolü sırasında hata:', err);
@@ -58,7 +55,6 @@ const Cart = ({ cart, removeFromCart }) => {
     }
   };
 
-  // Sepetteki aynı ürünleri birleştir
   const groupedCart = cart.reduce((acc, item) => {
     const existingItem = acc.find(i => i.id === item.id);
     
@@ -75,7 +71,7 @@ const Cart = ({ cart, removeFromCart }) => {
     return acc;
   }, []);
 
-  const handleRemoveFromCart = (itemId) => {
+  const removeItem = (itemId) => {
     removeFromCart(itemId);
     showPopup('Ürün sepetten kaldırıldı.', 'success');
   };
@@ -100,7 +96,7 @@ const Cart = ({ cart, removeFromCart }) => {
                   </div>
                   <button 
                     className="remove-button"
-                    onClick={() => handleRemoveFromCart(item.id)}
+                    onClick={() => removeItem(item.id)}
                   >
                     <FontAwesomeIcon icon={faTrash} />
                   </button>
@@ -115,7 +111,7 @@ const Cart = ({ cart, removeFromCart }) => {
               </div>
               <button 
                 className="checkout-button"
-                onClick={handleCheckout}
+                onClick={doCheckout}
               >
                 <FontAwesomeIcon icon={faCreditCard} /> Ödeme Yap
               </button>

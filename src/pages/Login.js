@@ -17,7 +17,7 @@ const Login = ({ onLogin }) => {
     setPopup({ show: true, message, type });
   };
 
-  const handleLogin = async (e) => {
+  const doLogin = async (e) => {
     e.preventDefault();
     try {
       const response = await API.post('api/auth/local', {
@@ -42,7 +42,7 @@ const Login = ({ onLogin }) => {
     <div className="auth-container">
       <div className="auth-card">
         <h2 className="auth-title">Giriş Yap</h2>
-        <form className="auth-form" onSubmit={handleLogin}>
+        <form className="auth-form" onSubmit={doLogin}>
           <div className="input-group">
             <FontAwesomeIcon icon={faUser} className="input-icon" />
             <input
