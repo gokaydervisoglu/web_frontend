@@ -6,7 +6,7 @@ import API from '../api';
 import '../styles/Payment.css';
 import Popup from '../components/Popup';
 
-const Payment = ({ userId }) => {
+const Payment = ({ userId, cart, clearCart }) => {
   const { state } = useLocation();
   const cart = state?.cart || [];
   const navigate = useNavigate();
@@ -224,6 +224,25 @@ const Payment = ({ userId }) => {
     } catch (err) {
       console.error('İşlem sırasında hata oluştu:', err);
       showPopup('İşlem sırasında bir hata oluştu!', 'error');
+      setIsProcessing(false);
+    }
+  };
+
+  const completePayment = async () => {
+    try {
+      // ... existing payment logic ...
+
+      if (orderResponse.status === 200 || orderResponse.status === 201) {
+        await updateCardBalance();
+        showPopup('Ödeme başarıyla tamamlandı!', 'success');
+        clearCart(); // Sepeti temizle
+        setTimeout(() => {
+          navigate('/orders');
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Ödeme işlemi sırasında hata:', err);
+      showPopup('Ödeme işlemi sırasında bir hata oluştu!', 'error');
       setIsProcessing(false);
     }
   };
