@@ -59,4 +59,47 @@
   text-align: center;
   color: #666;
   padding: 20px 0;
+}
+
+.order-items {
+  margin: 15px 0;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+.order-items h4 {
+  margin-bottom: 10px;
+  color: #333;
+  font-size: 1rem;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.order-item:last-child {
+  border-bottom: none;
+}
+
+.item-name {
+  flex: 2;
+  font-weight: 500;
+}
+
+.item-quantity {
+  flex: 1;
+  text-align: center;
+  color: #666;
+}
+
+.item-price {
+  flex: 1;
+  text-align: right;
+  font-weight: 500;
+  color: #2c3e50;
 } 

@@ -62,7 +62,18 @@ const Orders = ({ userId }) => {
                 <div className="order-content">
                   <p>Tarih: {new Date(createdAt).toLocaleString()}</p>
                   <p>Adres: {user_address?.address_title || 'Adres bilgisi yok'}</p>
-                  <p>Ürün Sayısı: {order_items?.length || 0}</p>
+                  
+                  <div className="order-items">
+                    <h4>Sipariş Detayı:</h4>
+                    {order_items && order_items.map((item, index) => (
+                      <div key={index} className="order-item">
+                        <span className="item-name">{item.product_name}</span>
+                        <span className="item-quantity">x{item.quantity}</span>
+                        <span className="item-price">₺{item.price}</span>
+                      </div>
+                    ))}
+                  </div>
+
                   <p className="order-total">
                     <FontAwesomeIcon icon={faCreditCard} /> Toplam: ₺{total_amount}
                   </p>
