@@ -1,6 +1,6 @@
 /* Favori butonu */
 .favorite-btn {
-  background: #ffffff;
+  background: transparent;
   border: none;
   width: 30px;
   height: 30px;
@@ -17,7 +17,7 @@
 }
 
 .favorite-btn:hover {
-  background: #ffffff;
+  background: transparent;
 }
 
 /* Ürün kartı */
