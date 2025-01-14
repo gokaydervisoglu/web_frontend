@@ -8,7 +8,9 @@ import {
   faShoppingCart, 
   faTags, 
   faListAlt,
-  faImage 
+  faImage,
+  faStar,
+  faCrown
 } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as regularHeart } from '@fortawesome/free-regular-svg-icons';
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +28,8 @@ const Home = ({ userId, addToCart, cart }) => {
     return savedQuantities ? JSON.parse(savedQuantities) : {};
   });
   const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
+  const [topSellingProducts, setTopSellingProducts] = useState([]);
+  const [topFavoriteProducts, setTopFavoriteProducts] = useState([]);
 
   const navigate = useNavigate();
 
@@ -237,7 +241,121 @@ const Home = ({ userId, addToCart, cart }) => {
   const goToCampaignDetail = (campaignDocumentId) => {
     navigate(`/campaign/${campaignDocumentId}`);
   };
-  
+
+  // En çok satan ürünleri bulma fonksiyonu
+  const fetchTopSellingProducts = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await API.get('/api/order-items?populate=*', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // Ürün satış sayılarını ve toplam satış miktarını hesapla
+      const productStats = {};
+      response.data.data.forEach(orderItem => {
+        if (orderItem.products && orderItem.products[0]) {
+          const productId = orderItem.products[0].id;
+          if (!productStats[productId]) {
+            productStats[productId] = {
+              totalQuantity: 0,  // Toplam satış miktarı
+              orderCount: 0,     // Kaç farklı siparişte satıldı
+              totalAmount: 0     // Toplam kazanç
+            };
+          }
+          productStats[productId].totalQuantity += orderItem.quantity;
+          productStats[productId].orderCount += 1;
+          productStats[productId].totalAmount += orderItem.quantity * orderItem.unit_price;
+        }
+      });
+
+      // Popülerlik skorunu hesapla
+      // (toplam satış miktarı * 0.4) + (sipariş sayısı * 0.4) + (toplam kazanç * 0.2)
+      const popularityScores = Object.entries(productStats).map(([id, stats]) => ({
+        id: parseInt(id),
+        score: (stats.totalQuantity * 0.4) + 
+               (stats.orderCount * 0.4) + 
+               ((stats.totalAmount / 1000) * 0.2) 
+      }));
+
+      // En yüksek skora sahip 2 ürünü seç
+      const topProducts = popularityScores
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 2)
+        .map(product => product.id);
+
+      // Eğer yeterli veri yoksa boş array döndür
+      if (topProducts.length === 0) {
+        console.log('Henüz yeterli satış verisi yok');
+        setTopSellingProducts([]);
+        return;
+      }
+
+      console.log('En popüler ürünler:', topProducts);
+      console.log('Popülerlik istatistikleri:', productStats);
+      
+      setTopSellingProducts(topProducts);
+    } catch (err) {
+      console.error('En çok satan ürünler alınırken hata:', err);
+      setTopSellingProducts([]);
+    }
+  };
+
+  // En çok favorilenen ürünleri bulma fonksiyonu
+  const fetchTopFavorites = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      // Tüm kullanıcıların favorilerini al
+      const response = await API.get('/api/favorites?populate=*', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // Ürünlerin favori sayılarını hesapla
+      const favoriteCounts = {};
+      response.data.data.forEach(favorite => {
+        if (favorite.product?.id) {
+          const productId = favorite.product.id;
+          if (!favoriteCounts[productId]) {
+            favoriteCounts[productId] = {
+              count: 0,
+              name: favorite.product.product_name 
+            };
+          }
+          favoriteCounts[productId].count += 1;
+        }
+      });
+
+      // Favori sayılarına göre sırala ve en çok favorilenen 2 ürünü al
+      const sortedProducts = Object.entries(favoriteCounts)
+        .sort(([, a], [, b]) => b.count - a.count) 
+        .slice(0, 2)
+        .map(([id, data]) => ({
+          id: parseInt(id),
+          count: data.count,
+          name: data.name
+        }));
+
+      console.log('En çok favorilenen ürünler:', sortedProducts);
+
+      if (sortedProducts.length === 0) {
+        console.log('Henüz favori ürün yok');
+        setTopFavoriteProducts([]);
+        return;
+      }
+
+      setTopFavoriteProducts(sortedProducts.map(product => product.id));
+    } catch (err) {
+      console.error('En çok favorilenen ürünler alınırken hata:', err);
+      setTopFavoriteProducts([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchTopSellingProducts();
+  }, []);
+
+  useEffect(() => {
+    fetchTopFavorites();
+  }, []);
 
   return (
     <div className="container">
@@ -305,7 +423,36 @@ const Home = ({ userId, addToCart, cart }) => {
       <div className="products-grid">
         {products.length > 0 ? (
           products.map((product) => (
-            <div className="home-product" key={product.id}>
+            <div 
+              className={`home-product ${
+                topSellingProducts.includes(product.id) && topFavoriteProducts.includes(product.id)
+                  ? 'super-product'
+                  : topSellingProducts.includes(product.id)
+                  ? 'top-selling'
+                  : topFavoriteProducts.includes(product.id)
+                  ? 'top-favorite'
+                  : ''
+              }`} 
+              key={product.id}
+            >
+              {topSellingProducts.includes(product.id) && topFavoriteProducts.includes(product.id) ? (
+                <div className="super-product-badge">
+                  <FontAwesomeIcon icon={faCrown} /> Popüler Ürün
+                </div>
+              ) : (
+                <>
+                  {topSellingProducts.includes(product.id) && (
+                    <div className="top-selling-badge">
+                      <FontAwesomeIcon icon={faStar} /> En Çok Satan
+                    </div>
+                  )}
+                  {topFavoriteProducts.includes(product.id) && (
+                    <div className="top-favorite-badge">
+                      <FontAwesomeIcon icon={solidHeart} /> En Çok Favorilenen
+                    </div>
+                  )}
+                </>
+              )}
               <button
                 className="favorite-btn"
                 onClick={() => toggleFavorite(product.id)}

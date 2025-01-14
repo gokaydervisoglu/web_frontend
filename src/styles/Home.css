@@ -34,6 +34,7 @@
   background-color: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-top: 15px;
 }
 
 .home-product:hover {
@@ -254,4 +255,75 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+/* En çok satan ürün stilleri */
+.top-selling {
+  border: 2px solid #ffd700 !important;
+  background: linear-gradient(to bottom, #fff9e6, #ffffff);
+}
+
+/* En çok favorilenen ürün stilleri */
+.top-favorite {
+  border: 2px solid #ff69b4 !important;
+  background: linear-gradient(to bottom, #fff0f5, #ffffff);
+}
+
+/* Süper ürün (hem en çok satan hem en çok favorilenen) */
+.super-product {
+  border: 2px solid #9932cc !important;
+  background: linear-gradient(to bottom, #f8f4ff, #ffffff);
+}
+
+/* Badge'ler */
+.top-selling-badge,
+.top-favorite-badge,
+.super-product-badge {
+  position: absolute;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 20;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.top-selling-badge {
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ffd700;
+  color: #000;
+}
+
+.top-favorite-badge {
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ff69b4;
+  color: white;
+}
+
+.super-product-badge {
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #9932cc;
+  color: white;
+}
+
+/* Hover efektleri */
+.top-selling:hover {
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.top-favorite:hover {
+  box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+}
+
+.super-product:hover {
+  box-shadow: 0 4px 15px rgba(153, 50, 204, 0.3);
 }
