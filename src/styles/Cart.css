@@ -98,6 +98,7 @@
   align-items: center;
   gap: 8px;
   transition: background-color 0.3s;
+  width: 15%;
 }
 
 .checkout-button:hover {

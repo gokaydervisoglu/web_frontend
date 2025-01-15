@@ -6,9 +6,8 @@ import API from '../api';
 import '../styles/Payment.css';
 import Popup from '../components/Popup';
 
-const Payment = ({ userId }) => {
+const Payment = ({ userId, cart, clearCart }) => {
   const { state } = useLocation();
-  const cart = state?.cart || [];
   const navigate = useNavigate();
 
   const [savedCards, setSavedCards] = useState([]);
@@ -216,7 +215,10 @@ const Payment = ({ userId }) => {
         await updateProductStock(item.id, item.quantity, token);
       }
 
+      // Başarılı ödeme sonrası sepeti temizle
+      clearCart();
       showPopup('Siparişiniz başarıyla oluşturuldu!', 'success');
+      
       setTimeout(() => {
         navigate('/');
       }, 2000);
@@ -235,9 +237,17 @@ const Payment = ({ userId }) => {
 
       <div className="payment-content">
         <div className="payment-section">
-          <h2>
-            <FontAwesomeIcon icon={faCreditCard} /> Kayıtlı Kartlar
-          </h2>
+          <div className="section-header">
+            <h2>
+              <FontAwesomeIcon icon={faCreditCard} /> Kayıtlı Kartlar
+            </h2>
+            <button 
+              className="add-new-btn"
+              onClick={() => navigate('/payment-methods')}
+            >
+              + Yeni Kart Ekle
+            </button>
+          </div>
           <div className="cards-list">
             {savedCards.length > 0 ? (
               savedCards.map((card) => (
@@ -264,9 +274,17 @@ const Payment = ({ userId }) => {
         </div>
 
         <div className="payment-section">
-          <h2>
-            <FontAwesomeIcon icon={faMapMarkerAlt} /> Teslimat Adresi
-          </h2>
+          <div className="section-header">
+            <h2>
+              <FontAwesomeIcon icon={faMapMarkerAlt} /> Teslimat Adresi
+            </h2>
+            <button 
+              className="add-new-btn"
+              onClick={() => navigate('/addresses')}
+            >
+              + Yeni Adres Ekle
+            </button>
+          </div>
           <div className="address-list">
             {addresses.length > 0 ? (
               <select
